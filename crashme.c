@@ -655,9 +655,10 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
      long tflag,nsubs,sr;
      char *cmd,*nb,*nt;
 {long j,pid,n,seq,total_time,dys,hrs,mns,scs;
+ char arg0[128]; 
  char arg2[20],arg4[20],arg5[20];
  time_t before_time,after_time;
- char cmdbuf[250];
+ char cmdbuf[512];
  int nticks;
  PROCESS_INFORMATION pinfo;
  STARTUPINFO sinfo;
@@ -680,17 +681,19 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
  time(&before_time);
  sprintf(arg5,"%d",verbose_level);
  for(j=0;j<n;++j)
-   {sprintf(arg2,"%d",sr+j);
+   {sprintf(arg0,"%s",cmd);
+    sprintf(arg2,"%d",sr+j);
     sprintf(arg4,"%d",j+1);
-    sprintf(cmdbuf,"%s %s %s %s %s %s %s",
+    sprintf(cmdbuf,"\"%s\" %s %s %s %s %s %s",
 	    cmd,nb,arg2,nt,arg4,arg5,subprocess_ind);
-    /* kind of dumb that this sinfo structure is a required argument */
-    memset(&sinfo,0,sizeof(STARTUPINFO));
-    sinfo.cb = sizeof (STARTUPINFO);
-    if (CreateProcess(NULL,cmdbuf,NULL,NULL,TRUE,0,NULL,NULL,&sinfo,&pinfo)
+    memset(&sinfo,0,sizeof(sinfo));
+    memset(&pinfo,0,sizeof(pinfo));
+    sinfo.cb = sizeof(sinfo);
+    if (CreateProcess(arg0,cmdbuf,NULL,NULL,TRUE,0,NULL,NULL,&sinfo,&pinfo)
 	== FALSE)
       {err = GetLastError();
        sprintf(notes,"err %d trying to create process",err);
+       note(1);
        continue;}
     sprintf(notes,"pid = %d 0x%X (subprocess %d)",
 	    pinfo.dwProcessId,pinfo.dwProcessId,j+1);
