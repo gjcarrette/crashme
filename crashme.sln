@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "crashme", "crashme.vcproj", "{BF6ECF6D-B1B1-42FF-B519-D61F260DF488}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pddet", "pddet.vcproj", "{190F21A0-DD7F-40D6-8259-49CF705FBA54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BF6ECF6D-B1B1-42FF-B519-D61F260DF488}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BF6ECF6D-B1B1-42FF-B519-D61F260DF488}.Debug|Win32.Build.0 = Debug|Win32
+		{BF6ECF6D-B1B1-42FF-B519-D61F260DF488}.Release|Win32.ActiveCfg = Release|Win32
+		{BF6ECF6D-B1B1-42FF-B519-D61F260DF488}.Release|Win32.Build.0 = Release|Win32
+		{190F21A0-DD7F-40D6-8259-49CF705FBA54}.Debug|Win32.ActiveCfg = Debug|Win32
+		{190F21A0-DD7F-40D6-8259-49CF705FBA54}.Debug|Win32.Build.0 = Debug|Win32
+		{190F21A0-DD7F-40D6-8259-49CF705FBA54}.Release|Win32.ActiveCfg = Release|Win32
+		{190F21A0-DD7F-40D6-8259-49CF705FBA54}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
