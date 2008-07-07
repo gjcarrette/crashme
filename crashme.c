@@ -1,10 +1,10 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.4 20-MAY-1994";
+char *crashme_version = "2.5 6-JUL-2008";
 
 /*
- *             COPYRIGHT (c) 1990-1994 BY        *
+ *             COPYRIGHT (c) 1990-2008 BY        *
  *  GEORGE J. CARRETTE, CONCORD, MASSACHUSETTS.  *
  *             ALL RIGHTS RESERVED               *
 
@@ -39,7 +39,7 @@ would be a different thing. It would also make sense to run this
 stress test at the same time you run other tests, like a multi-user
 benchmark.
 
-Comments may be addressed to the author at GJC@WORLD.STD.COM
+Comments may be addressed to the author at GJC@ALUM.MIT.EDU
 
 See the documentation in crashme.1 and READ.ME, or read this code for 
 a description of command line arguments to this program. 
@@ -61,6 +61,7 @@ Version Date         Description
  2.2     9-MAY-1994  __ALPHA && VMS version is now more interesting.
  2.3    11-MAY-1994  Added _IBMRT2 and _POWER code.
  2.4    20-MAY-1994  Added __hpux. Linux from jik@cam.ov.com.
+ 2.5     6-JUL-2008  more WIN32 support
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -641,6 +642,16 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
 
 #else
 
+char *find_exe_self(char *cmd)
+     /* function grabbed from SIOD */
+{DWORD retsize;
+ char exe_self[512];
+ retsize = SearchPath(NULL,cmd,".EXE",sizeof(exe_self),exe_self,NULL);
+ if (retsize > 0)
+  return(_strdup(exe_self));
+ else
+  return(cmd);}
+
 void chk_CloseHandle(HANDLE h)
 {DWORD err;
  if (CloseHandle(h) == FALSE)
@@ -655,10 +666,10 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
      long tflag,nsubs,sr;
      char *cmd,*nb,*nt;
 {long j,pid,n,seq,total_time,dys,hrs,mns,scs;
- char arg0[128]; 
+ char arg0[512];
  char arg2[20],arg4[20],arg5[20];
  time_t before_time,after_time;
- char cmdbuf[512];
+ char cmdbuf[1024];
  int nticks;
  PROCESS_INFORMATION pinfo;
  STARTUPINFO sinfo;
@@ -681,7 +692,7 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
  time(&before_time);
  sprintf(arg5,"%d",verbose_level);
  for(j=0;j<n;++j)
-   {sprintf(arg0,"%s",cmd);
+   {sprintf(arg0,"%s",find_exe_self(cmd));
     sprintf(arg2,"%d",sr+j);
     sprintf(arg4,"%d",j+1);
     sprintf(cmdbuf,"\"%s\" %s %s %s %s %s %s",

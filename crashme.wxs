@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
+ <Product Id="????????-????-????-????-????????????"
+          UpgradeCode="777642F9-DDFA-41E7-8B28-012FCD04FCB0" 
+          Name="CRASHME v2.5" 
+          Language="1033" 
+          Version="2.5" 
+          Manufacturer="George J. Carrette">
+  <Package Id="????????-????-????-????-????????????"
+           Description="CRASHME a system robustness tester"
+           Comments="CRASHME"
+           Manufacturer="George J. Carrette" 
+           InstallerVersion="200" 
+           Compressed="yes" />
+  <Property Id="ARPURLINFOABOUT" Value="http://alum.mit.edu/www/gjc/crashme.html" />
+  <Property Id="ARPURLUPDATEINFO" Value="http://www.codeplex.com/crashme" />
+  <Property Id="ALLUSERS" Value="1"/>
+
+  <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+  <Directory Id="TARGETDIR" Name="SourceDir">
+   <Directory Id="StartMenuFolder" Name="StrtFldr">
+    <Directory Id="ProgramMenuFolder" Name="PrgFldr">
+     <Directory Id="CRASHMEProgramsFolder" Name="CRASHME"/>
+    </Directory>
+   </Directory>
+
+   <Directory Id="ProgramFilesFolder" Name="PFiles">
+    <Directory Id="CRASHMEDIR" Name="CRASHME">
+     <Component Id="CRASHMEProgram" Guid="A320292B-725D-40F5-B09A-E0B0C7735A28">
+
+     <File Id="FILE00.DAT" Name="FILE00.DAT" LongName="TEST1.BAT" Source="TEST1.BAT" DiskId="1"/>
+     <File Id="FILE01.DAT" Name="FILE01.DAT" LongName="build.bat" Source="build.bat" DiskId="1"/>
+     <File Id="FILE02.DAT" Name="FILE02.DAT" LongName="crashme.c" Source="crashme.c" DiskId="1"/>
+     <File Id="FILE03.DAT" Name="FILE03.DAT" LongName="crashme.html" Source="crashme.html" DiskId="1"/>
+     <File Id="FILE04.DAT" Name="FILE04.DAT" LongName="crashme.sln" Source="crashme.sln" DiskId="1"/>
+     <File Id="FILE05.DAT" Name="FILE05.DAT" LongName="crashme.txt" Source="crashme.txt" DiskId="1"/>
+     <File Id="FILE06.DAT" Name="FILE06.DAT" LongName="crashme.vcproj" Source="crashme.vcproj" DiskId="1"/>
+     <File Id="FILE07.DAT" Name="FILE07.DAT" LongName="crashme.wxs" Source="crashme.wxs" DiskId="1"/>
+     <File Id="FILE08.DAT" Name="FILE08.DAT" LongName="license.rtf" Source="license.rtf" DiskId="1"/>
+     <File Id="FILE09.DAT" Name="FILE09.DAT" LongName="pddet.c" Source="pddet.c" DiskId="1"/>
+     <File Id="FILE10.DAT" Name="FILE10.DAT" LongName="pddet.vcproj" Source="pddet.vcproj" DiskId="1"/>
+     <File Id="FILE11.DAT" Name="FILE11.DAT" LongName="pddet.exe" Source="output/Release/pddet/pddet.exe" DiskId="1"/>
+     <File Id="FILE12.DAT" Name="FILE12.DAT" LongName="crashme.exe" Source="output/Release/crashme/crashme.exe" DiskId="1"/>
+     </Component>
+    </Directory>
+   </Directory>
+  </Directory>
+
+  <DirectoryRef Id="CRASHMEProgramsFolder">
+   <Component Id="CRASHMEShortcut" Guid="33C535B1-7D07-44E6-B6C6-7E3ACF3083FA" DiskId="1">
+    <Shortcut Id="CRASHMEShortcut1" Name="TEST1.BAT" 
+              Description="TEST 1" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\TEST1.BAT" 
+               />
+    <Shortcut Id="CRASHMEShortcut2" 
+              Name="license.rtf"  LongName="license.rtf"
+              Description="CRASHME License" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\license.rtf" 
+              />
+    <Shortcut Id="CRASHMEShortcut3" 
+              Name="crashme.htm"  LongName="crashme.html"
+              Description="CRASHME Documentation" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\crashme.html" 
+              />
+    <Shortcut Id="CRASHMEShortcut4" 
+              Name="crashme.htm"  LongName="crashme.txt"
+              Description="CRASHME Documentation" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\crashme.txt" 
+              />
+   </Component>
+  </DirectoryRef>
+
+  <Feature Id="FeatureCrashme1" 
+           Title="Crashme" Level="1" ConfigurableDirectory="CRASHMEDIR">
+   <ComponentRef Id="CRASHMEProgram" />
+   <ComponentRef Id="CRASHMEShortcut" />
+  </Feature>
+
+
+  <UIRef Id="WixUI_Mondo" /> 
+
+ </Product>
+</Wix>
