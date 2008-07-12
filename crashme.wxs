@@ -2,12 +2,12 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
  <Product Id="????????-????-????-????-????????????"
           UpgradeCode="777642F9-DDFA-41E7-8B28-012FCD04FCB0" 
-          Name="CRASHME v2.5" 
+          Name="CRASHME v2.6" 
           Language="1033" 
-          Version="2.5" 
+          Version="2.6" 
           Manufacturer="George J. Carrette">
   <Package Id="????????-????-????-????-????????????"
-           Description="CRASHME a system robustness tester"
+           Description="CRASHME a system robustness tester, version 2.6"
            Comments="CRASHME"
            Manufacturer="George J. Carrette" 
            InstallerVersion="200" 
@@ -41,6 +41,8 @@
      <File Id="FILE10.DAT" Name="FILE10.DAT" LongName="pddet.vcproj" Source="pddet.vcproj" DiskId="1"/>
      <File Id="FILE11.DAT" Name="FILE11.DAT" LongName="pddet.exe" Source="output/Release/pddet/pddet.exe" DiskId="1"/>
      <File Id="FILE12.DAT" Name="FILE12.DAT" LongName="crashme.exe" Source="output/Release/crashme/crashme.exe" DiskId="1"/>
+     <File Id="FILE13.DAT" Name="FILE13.DAT" LongName="mt19937ar.c" Source="mt19937ar.c" DiskId="1"/>
+     <File Id="FILE14.DAT" Name="FILE14.DAT" LongName="mt19937ar.h" Source="mt19937ar.h" DiskId="1"/>
      </Component>
     </Directory>
    </Directory>

@@ -1,0 +1,4 @@
+@DEL *.WIXOBJ
+@DEL *.EXE
+@DEL /S /Q OUTPUT
+
