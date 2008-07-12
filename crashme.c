@@ -1,7 +1,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.5 6-JUL-2008";
+char *crashme_version = "2.6 12-JUL-2008";
 
 /*
  *             COPYRIGHT (c) 1990-2008 BY        *
@@ -62,6 +62,7 @@ Version Date         Description
  2.3    11-MAY-1994  Added _IBMRT2 and _POWER code.
  2.4    20-MAY-1994  Added __hpux. Linux from jik@cam.ov.com.
  2.5     6-JUL-2008  more WIN32 support
+ 2.6    12-JUL-2008  Option to use Mersenne twister pseudorandom number generator.
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -124,7 +125,6 @@ a script.
 
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -152,6 +152,10 @@ a script.
 #include <unistd.h>
 #endif
 
+#ifdef PRNG_MT
+#include "mt19937ar.h"
+#endif
+
 typedef void (*BADBOY)();
 
 BADBOY badboy;
@@ -167,13 +171,14 @@ char *notes;
 
 long verbose_level = 5;
 
-void old_main(),copyright_note(),vfork_main(),badboy_loop();
-void record_note();
-
+void old_main(int argc,char **argv);
+void copyright_note(long n);
+void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt);
+void badboy_loop(void);
 
 FILE *logfile = NULL;
 
-void record_note()
+void record_note(void)
 {char *logfilename;
  if (!(logfilename = getenv("CRASHLOG"))) return;
  if (!(logfile = fopen(logfilename,
@@ -187,20 +192,19 @@ void record_note()
  fclose(logfile);
  logfile = NULL;}
 
-void open_record()
+void open_record(void)
 {char *logfilename;
  if (!(logfilename = getenv("CRASHLOG"))) return;
  if (!(logfile = fopen(logfilename,"a")))
    {perror(logfilename);
     return;}}
 
-void close_record()
+void close_record(void)
 {if (logfile)
    {fclose(logfile);
     logfile = NULL;}}
  
-void note(level)
-     long level;
+void note(long level)
 {if (level > verbose_level) return;
  strcat(note_buffer,"\n");
  fputs(note_buffer,stdout);
@@ -211,8 +215,7 @@ void note(level)
 jmp_buf again_buff;
 #endif
 
-unsigned char *bad_malloc(n)
-     long n;
+unsigned char *bad_malloc(long n)
 {unsigned char *data;
  data = (unsigned char *) malloc(n);
 #ifdef pyr
@@ -224,8 +227,7 @@ unsigned char *bad_malloc(n)
 
 #ifndef WIN32
 
-void again_handler(sig)
-     int sig;
+void again_handler(int sig)
 {char *ss;
  switch(sig)
    {case SIGILL: ss =   " illegal instruction"; break;
@@ -252,9 +254,7 @@ void again_handler(sig)
  note(5);
  longjmp(again_buff,3);}
 
-void my_signal(sig, func)
-     int sig;
-     void (*func)();
+void my_signal(int sig,void (*func)())
 {
 #ifndef SA_ONESHOT
  signal(sig, func);
@@ -273,7 +273,7 @@ void my_signal(sig, func)
 #endif /* SA_ONESHOT */
 }
  
-set_up_signals()
+set_up_signals(void)
 {my_signal(SIGILL,again_handler);
 #ifdef SIGTRAP
  my_signal(SIGTRAP,again_handler);
@@ -296,12 +296,22 @@ set_up_signals()
 
 #endif
 
-void compute_badboy_1(n)
-     long n;
+void compute_badboy_1(long n)
 {long j;
  if (malloc_flag == 1)
    the_data = bad_malloc(n);
+#ifdef PRNG_MT
+ for(j=0;(j+3)<n; j += 4)
+   {
+     unsigned long u = genrand_int32();
+     the_data[j+0] = (u >> 24) & 0xFF;
+     the_data[j+1] = (u >> 16) & 0xFF;
+     the_data[j+2] = (u >> 8) & 0xFF;
+     the_data[j+3] = (u >> 0) & 0xFF;
+   }
+#else
  for(j=0;j<n;++j) the_data[j] = (rand() >> 7) & 0xFF;
+#endif
  if (nbytes < 0)
    {sprintf(notes,"Dump of %ld bytes of data",n);
     note(1);
@@ -310,15 +320,14 @@ void compute_badboy_1(n)
        if ((j % 20) == 19) putc('\n',stdout); else putc(' ',stdout);}
     putc('\n',stdout);}}
 
-void proto_badboy()
+void proto_badboy(void)
 {printf("Hello world.\n");}
 
 #if defined(__ALPHA) && defined(VMS) && !defined(NOCASTAWAY)
 #include <pdscdef.h>
 #endif
 
-BADBOY castaway(dat)
-     char *dat;
+BADBOY castaway(char *dat)
 {
 #if defined(VAX) && !defined(NOCASTAWAY)
   /* register save mask avoids bashing our callers locals */
@@ -348,7 +357,7 @@ BADBOY castaway(dat)
 #endif
   return((BADBOY)dat);}
 
-void compute_badboy()
+void compute_badboy(void)
 {long n;
  n = (nbytes < 0) ? - nbytes : nbytes;
  if (incptr == 0)
@@ -370,22 +379,23 @@ void compute_badboy()
                          the_data,(nbytes < 0) ? - nbytes : nbytes);
 */
 
-void try_one_crash()
+void try_one_crash(void)
 {if (nbytes > 0)
    (*badboy)();
  else if (nbytes == 0)
    while(1);}
 
 char *subprocess_ind = "subprocess";
+int subprocess_flag = 0;
  
-main(argc,argv)
-     int argc; char **argv;
+int main(int argc, char **argv)
 {long nsubs,hrs,mns,scs,tflag,j,m;
  note_buffer = (char *) malloc(512);
  notes = note_buffer;
  if ((argc == 7) &&
      (strcmp(argv[6],subprocess_ind) == 0))
    {sprintf(note_buffer,"Subprocess %s: ",argv[4]);
+    subprocess_flag = 1;
     notes = note_buffer + strlen(note_buffer);
     verbose_level = atol(argv[5]);
     sprintf(notes,"starting");
@@ -429,16 +439,28 @@ main(argc,argv)
     note(0);}
  return(EXIT_SUCCESS);}
 
-void copyright_note(n)
-     long n;
-{sprintf(notes,"Crashme: (c) Copyright 1990-1994 George J. Carrette");
+void copyright_note1(long n)
+{
+ sprintf(notes,"Crashme: (c) Copyright 1990-2008 George J. Carrette");
  note(n);
  sprintf(notes,"Version: %s",crashme_version);
- note(n);}
+ note(n);
+ sprintf(notes,"From http://www.codeplex.com/crashme and http://alum.mit.edu/www/gjc/crashme.html");
+ note(n);
+#ifdef PRNG_MT
+ sprintf(notes,"Using Mersenne twister http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html");
+ note(n);
+#endif
+}
 
-void old_main(argc,argv)
-     int argc;
-     char **argv;
+void copyright_note(long n)
+{
+  if (subprocess_flag == 0)
+    copyright_note1(n);
+}
+    
+
+void old_main(int argc,char **argv)
 {char *ptr;
  copyright_note(3);
  nbytes = atol(argv[1]);
@@ -456,7 +478,11 @@ void old_main(argc,argv)
     badboy = castaway(the_data);
     sprintf(notes,"Badboy at %d. 0x%X",badboy,badboy);
     note(3);}
+#ifdef PRNG_MT
+ init_genrand(nseed);
+#else
  srand(nseed);
+#endif 
 #ifdef WIN32
  SetErrorMode(SEM_FAILCRITICALERRORS |
 	      SEM_NOGPFAULTERRORBOX |
@@ -478,7 +504,7 @@ DWORD exception_filter(DWORD value)
  return(EXCEPTION_EXECUTE_HANDLER);}
 #endif
 
-void badboy_loop()
+void badboy_loop(void)
 {int i;
  for(i=0;i<ntrys;++i)
    {compute_badboy();
@@ -516,20 +542,21 @@ struct status_list
 
 struct status_list *slist = NULL;
 
-record_status(n)
-     long n;
+void record_status(long n)
 {struct status_list *l;
  for(l=slist;l != NULL; l = l->next)
    if (n == l->status)
-     return(++l->count);
+     {
+       ++l->count;
+       return;
+     }
  l = (struct status_list *) malloc(sizeof(struct status_list));
  l->count = 1;
  l->status = n;
  l->next = slist;
- slist = l;
- return(1);}
+ slist = l;}
 
-void summarize_status()
+void summarize_status(void)
 {struct status_list *l;
  sprintf(notes,"exit status ... number of cases");
  note(2);
@@ -546,8 +573,7 @@ long monitor_limit =  6; /* 30 second limit on a subprocess */
 long monitor_count = 0;
 long monitor_active = 0;
 
-void monitor_fcn(sig)
-     int sig;
+void monitor_fcn(int sig)
 {long status;
  my_signal(SIGALRM,monitor_fcn);
  alarm(monitor_period);
@@ -563,9 +589,7 @@ void monitor_fcn(sig)
 	  note(3);}
        monitor_active = 0;}}}
 
-void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
-     long tflag,nsubs,sr;
-     char *cmd,*nb,*nt;
+void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 {long j,pid,n,seq,total_time,dys,hrs,mns,scs;
  int status;
  char arg2[20],arg4[20],arg5[20];
@@ -662,10 +686,8 @@ void chk_CloseHandle(HANDLE h)
 int maxticks = 100; /* tenths of a second before forced termination
 		       of the subprocess */
 
-void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
-     long tflag,nsubs,sr;
-     char *cmd,*nb,*nt;
-{long j,pid,n,seq,total_time,dys,hrs,mns,scs;
+void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
+{long j,n,seq,total_time,dys,hrs,mns,scs;
  char arg0[512];
  char arg2[20],arg4[20],arg5[20];
  time_t before_time,after_time;
@@ -748,13 +770,13 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
 	 break;}}
     if (tflag == 1)
       {time(&after_time);
-       total_time = after_time - before_time;
+       total_time = (long) (after_time - before_time);
        if (total_time >= nsubs)
 	 {sprintf(notes,"Time limit reached after run %d",j+1);
 	  note(2);
 	  break;}}}
  time(&after_time);
- total_time = after_time - before_time;
+ total_time = (long) (after_time - before_time);
  scs = total_time;
  mns = scs / 60;
  hrs = mns / 60;
@@ -768,7 +790,7 @@ void vfork_main(tflag,nsubs,cmd,nb,sr,nt)
 	 total_time,dys,hrs,mns,scs);
  note(1);
  summarize_status();
- open_record();}
+ close_record();}
 
 #endif
 

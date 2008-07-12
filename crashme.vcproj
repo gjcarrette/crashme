@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;$(NOINHERIT)"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;PRNG_MT;$(NOINHERIT)"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -114,7 +114,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;$(NOINHERIT)"
+				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32;PRNG_MT;$(NOINHERIT)"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -174,12 +174,20 @@
 				RelativePath=".\crashme.c"
 				>
 			</File>
+			<File
+				RelativePath=".\mt19937ar.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\mt19937ar.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
