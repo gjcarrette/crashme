@@ -152,8 +152,18 @@ a script.
 #include <unistd.h>
 #endif
 
+void prng_setup(long nseed);
+
+#define PRNG_TYPE_RAND 1
+#define PRNG_TYPE_MT 2
+
+int prng_type;
+
 #ifdef PRNG_MT
+#define PRNG_DEFAULT PRNG_TYPE_MT
 #include "mt19937ar.h"
+#else
+#define PRNG_DEFAULT PRNG_TYPE_RAND
 #endif
 
 typedef void (*BADBOY)();
@@ -166,6 +176,7 @@ long offset = 0;
 long next_offset = 0;
 long malloc_flag = 0;
 unsigned char *the_data;
+#define NOTE_BUFFER_LEN 1024
 char *note_buffer;
 char *notes;
 
@@ -176,26 +187,45 @@ void copyright_note(long n);
 void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt);
 void badboy_loop(void);
 
+
+char *subprocess_ind = "subprocess";
+int subprocess_flag = 0;
+
+/* Strictly speaking there should be an interlock on the log file
+   when it is being written to by multiple processes, but the overhead of
+   that would interfer with the behavior of crashme, and for the most part
+   the fflush is good enough to help us sort out any result */
+
+int vfork_flag = 0;
 FILE *logfile = NULL;
+char *logfilename = NULL;
+
+int note_count = 0;
 
 void record_note(void)
-{char *logfilename;
- if (!(logfilename = getenv("CRASHLOG"))) return;
- if (!(logfile = fopen(logfilename,
-		       (strncmp(note_buffer,"Subprocess",10) == 0)
-		       ? "a" : "w")))
-   {perror(logfilename);
-    return;}
- if (note_buffer[strlen(note_buffer)-1] != '\n')
-   strcat(note_buffer,"\n");
- fputs(note_buffer,logfile);
- fclose(logfile);
- logfile = NULL;}
+{
+  if (logfile && (note_count > 0))
+    {
+      fflush(logfile);
+      if ((subprocess_flag == 0) && (vfork_flag == 1))
+	{
+	  /* we have children. Closing and opening the file will provide a bit
+	     better output, avoiding the mixup, and without the complexity of
+	     a lock. */
+	  fclose(logfile);
+	  logfile = fopen(logfilename,"a");
+	}
+    }
+  note_count = 0;
+}
 
 void open_record(void)
-{char *logfilename;
- if (!(logfilename = getenv("CRASHLOG"))) return;
- if (!(logfile = fopen(logfilename,"a")))
+{char *tmp;
+ if ((!(tmp = getenv("CRASHLOG"))) ||
+     (strcmp(tmp,"") == 0))
+   return;
+ logfilename = _strdup(tmp);
+ if (!(logfile = fopen(logfilename,(subprocess_flag) ? "a" : "w")))
    {perror(logfilename);
     return;}}
 
@@ -203,9 +233,10 @@ void close_record(void)
 {if (logfile)
    {fclose(logfile);
     logfile = NULL;}}
- 
+
 void note(long level)
 {if (level > verbose_level) return;
+ ++note_count;
  strcat(note_buffer,"\n");
  fputs(note_buffer,stdout);
  if (logfile)
@@ -300,18 +331,28 @@ void compute_badboy_1(long n)
 {long j;
  if (malloc_flag == 1)
    the_data = bad_malloc(n);
+
+ switch (prng_type)
+    {
+    case PRNG_TYPE_MT:
 #ifdef PRNG_MT
- for(j=0;(j+3)<n; j += 4)
-   {
-     unsigned long u = genrand_int32();
-     the_data[j+0] = (u >> 24) & 0xFF;
-     the_data[j+1] = (u >> 16) & 0xFF;
-     the_data[j+2] = (u >> 8) & 0xFF;
-     the_data[j+3] = (u >> 0) & 0xFF;
-   }
-#else
- for(j=0;j<n;++j) the_data[j] = (rand() >> 7) & 0xFF;
+      for(j=0;(j+3)<n; j += 4)
+	{
+	  unsigned long u = genrand_int32();
+	  the_data[j+0] = (u >> 24) & 0xFF;
+	  the_data[j+1] = (u >> 16) & 0xFF;
+	  the_data[j+2] = (u >> 8) & 0xFF;
+	  the_data[j+3] = (u >> 0) & 0xFF;
+	}
 #endif
+      break;
+    case PRNG_TYPE_RAND:
+      for(j=0;j<n;++j) the_data[j] = (rand() >> 7) & 0xFF;
+      break;
+    default:
+      break;
+    }
+
  if (nbytes < 0)
    {sprintf(notes,"Dump of %ld bytes of data",n);
     note(1);
@@ -385,12 +426,9 @@ void try_one_crash(void)
  else if (nbytes == 0)
    while(1);}
 
-char *subprocess_ind = "subprocess";
-int subprocess_flag = 0;
- 
 int main(int argc, char **argv)
 {long nsubs,hrs,mns,scs,tflag,j,m;
- note_buffer = (char *) malloc(512);
+ note_buffer = (char *) malloc(NOTE_BUFFER_LEN);
  notes = note_buffer;
  if ((argc == 7) &&
      (strcmp(argv[6],subprocess_ind) == 0))
@@ -399,16 +437,23 @@ int main(int argc, char **argv)
     notes = note_buffer + strlen(note_buffer);
     verbose_level = atol(argv[5]);
     sprintf(notes,"starting");
+    open_record();
     note(3);
+    record_note();
     old_main(4,argv);}
  else if (argc == 4)
-   old_main(4,argv);
+   {
+     open_record();
+     old_main(4,argv);
+   }
  else if ((argc == 6) && ((strlen(argv[4]) == 0) ||
 			  (strcmp(argv[4],".") == 0)))
    {verbose_level = atol(argv[5]);
+    open_record();
     old_main(4,argv);}
  else if ((argc == 5) || (argc == 6))
-   {if (argc == 6)
+   {open_record();
+    if (argc == 6)
       verbose_level = atol(argv[5]);
     copyright_note(1);
     if (argc < 7)
@@ -432,11 +477,16 @@ int main(int argc, char **argv)
        nsubs = atol(argv[4]);
        sprintf(notes,"Creating %d crashme subprocesses",nsubs);}
     note(1);
+    prng_setup(0);
+    record_note();
+    vfork_flag = 1;
     vfork_main(tflag,nsubs,argv[0],argv[1],atol(argv[2]),argv[3]);}
  else
-   {sprintf(notes,
+   {open_record();
+    sprintf(notes,
 	    "crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verbose]");
     note(0);}
+ close_record();
  return(EXIT_SUCCESS);}
 
 void copyright_note1(long n)
@@ -445,10 +495,10 @@ void copyright_note1(long n)
  note(n);
  sprintf(notes,"Version: %s",crashme_version);
  note(n);
- sprintf(notes,"From http://www.codeplex.com/crashme and http://alum.mit.edu/www/gjc/crashme.html");
+ sprintf(notes,"From http://alum.mit.edu/www/gjc/crashme.html");
  note(n);
 #ifdef PRNG_MT
- sprintf(notes,"Using Mersenne twister http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html");
+ sprintf(notes,"With http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html");
  note(n);
 #endif
 }
@@ -459,6 +509,40 @@ void copyright_note(long n)
     copyright_note1(n);
 }
     
+void prng_setup(long nseed)
+{
+  char *prng_name,*tmp;
+  prng_name = "";
+  if ((tmp = getenv("CRASHPRNG")) &&
+      (strcmp(tmp,"") != 0))
+    prng_name = tmp;
+  if (strcmp(prng_name,"RAND") == 0)
+    prng_type = PRNG_TYPE_RAND;
+  else if (strcmp(prng_name,"MT") == 0)
+    prng_type = PRNG_TYPE_MT;
+  else
+    prng_type = PRNG_DEFAULT;
+
+  switch (prng_type)
+    {
+    case PRNG_TYPE_MT:
+#ifdef PRNG_MT
+      sprintf(notes,"CRASHPRNG %s %d Mersenne twister.",prng_name,prng_type);
+      init_genrand(nseed);
+#endif
+      break;
+    case PRNG_TYPE_RAND:
+      sprintf(notes,"CRASHPRNG %s %d C runtime library rand.",prng_name,prng_type);
+      srand(nseed);
+      break;
+    default:
+      sprintf(notes,"CRASHPRNG %s %d UNKNOWN",prng_name,prng_type);
+      break;
+    }
+  note((subprocess_flag == 0) ? 1 : 3);
+  record_note();
+}
+
 
 void old_main(int argc,char **argv)
 {char *ptr;
@@ -478,11 +562,7 @@ void old_main(int argc,char **argv)
     badboy = castaway(the_data);
     sprintf(notes,"Badboy at %d. 0x%X",badboy,badboy);
     note(3);}
-#ifdef PRNG_MT
- init_genrand(nseed);
-#else
- srand(nseed);
-#endif 
+ prng_setup(nseed);
 #ifdef WIN32
  SetErrorMode(SEM_FAILCRITICALERRORS |
 	      SEM_NOGPFAULTERRORBOX |
@@ -634,19 +714,24 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 	    {monitor_active = 0;
 	     sprintf(notes,"pid %d 0x%X exited with status %d",pid,pid,status);
 	     note(3);
-	     record_status(status);}}
+	     record_status(status);
+	     record_note();
+	    }}
        if (tflag == 1)
 	 {time(&after_time);
 	  total_time = after_time - before_time;
 	  if (total_time >= nsubs)
 	    {sprintf(notes,"Time limit reached after run %d",j+1);
 	     note(2);
+	     record_note();
 	     break;}}}}
  if (seq == 0)
    while((pid = wait(&status)) > 0)
      {sprintf(notes,"pid %d 0x%X exited with status %d",pid,pid,status);
       note(3);
-      record_status(status);}
+      record_status(status);
+      record_note();
+     }
  time(&after_time);
  total_time = after_time - before_time;
  scs = total_time;
@@ -656,13 +741,10 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  scs = scs % 60;
  mns = mns % 60;
  hrs = hrs % 24;
- open_record();
  sprintf(notes,
 	 "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
 	 total_time,dys,hrs,mns,scs);
- note(1);
- summarize_status();
- close_record();}
+ note(1);}
 
 #else
 
@@ -727,10 +809,12 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
       {err = GetLastError();
        sprintf(notes,"err %d trying to create process",err);
        note(1);
+       record_note();
        continue;}
     sprintf(notes,"pid = %d 0x%X (subprocess %d)",
 	    pinfo.dwProcessId,pinfo.dwProcessId,j+1);
     note(3);
+    record_note();
     nticks = 0;
     while(1)
       {if (GetExitCodeProcess(pinfo.hProcess,&exit_code) == TRUE)
@@ -739,6 +823,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 	       {sprintf(notes,"time limit reached on pid %d 0x%X. using kill.",
 			pinfo.dwProcessId,pinfo.dwProcessId);
 		note(3);
+		record_note();
 		if (TerminateProcess(pinfo.hProcess,
 				     APPLICATION_ERROR_MASK |
 				     ERROR_SEVERITY_ERROR |
@@ -746,6 +831,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 		  {err = GetLastError();
 		   sprintf(notes,"err %d trying to terminate process.",err);
 		   note(3);
+		   record_note();
 		   chk_CloseHandle(pinfo.hProcess);
 		   chk_CloseHandle(pinfo.hThread);
 		   break;}
@@ -760,6 +846,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 	    record_status(exit_code);
 	    chk_CloseHandle(pinfo.hProcess);
 	    chk_CloseHandle(pinfo.hThread);
+	    record_note();
 	    break;}}
       else
 	{err = GetLastError();
@@ -767,6 +854,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 	 note(3);
 	 chk_CloseHandle(pinfo.hProcess);
 	 chk_CloseHandle(pinfo.hThread);
+	 record_note();
 	 break;}}
     if (tflag == 1)
       {time(&after_time);
@@ -774,6 +862,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
        if (total_time >= nsubs)
 	 {sprintf(notes,"Time limit reached after run %d",j+1);
 	  note(2);
+	  record_note();
 	  break;}}}
  time(&after_time);
  total_time = (long) (after_time - before_time);
@@ -784,13 +873,11 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  scs = scs % 60;
  mns = mns % 60;
  hrs = hrs % 24;
- open_record();
  sprintf(notes,
 	 "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
 	 total_time,dys,hrs,mns,scs);
  note(1);
- summarize_status();
- close_record();}
+ summarize_status();}
 
 #endif
 

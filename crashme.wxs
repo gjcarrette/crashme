@@ -43,6 +43,9 @@
      <File Id="FILE12.DAT" Name="FILE12.DAT" LongName="crashme.exe" Source="output/Release/crashme/crashme.exe" DiskId="1"/>
      <File Id="FILE13.DAT" Name="FILE13.DAT" LongName="mt19937ar.c" Source="mt19937ar.c" DiskId="1"/>
      <File Id="FILE14.DAT" Name="FILE14.DAT" LongName="mt19937ar.h" Source="mt19937ar.h" DiskId="1"/>
+     <File Id="FILE15.DAT" Name="FILE15.DAT" LongName="TEST2.BAT" Source="TEST2.BAT" DiskId="1"/>
+     <File Id="FILE16.DAT" Name="FILE16.DAT" LongName="SETUP.CMD" Source="SETUP.CMD" DiskId="1"/>
+     <File Id="FILE17.DAT" Name="FILE17.DAT" LongName="TEST3.BAT" Source="TEST3.BAT" DiskId="1"/>
      </Component>
     </Directory>
    </Directory>
@@ -50,28 +53,44 @@
 
   <DirectoryRef Id="CRASHMEProgramsFolder">
    <Component Id="CRASHMEShortcut" Guid="33C535B1-7D07-44E6-B6C6-7E3ACF3083FA" DiskId="1">
-    <Shortcut Id="CRASHMEShortcut1" Name="TEST1.BAT" 
+    <Shortcut Id="CRASHMEShortcut01" Name="TEST1.BAT" 
               Description="TEST 1" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\TEST1.BAT" 
                />
-    <Shortcut Id="CRASHMEShortcut2" 
+    <Shortcut Id="CRASHMEShortcut02" Name="TEST2.BAT" 
+              Description="TEST 2" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\TEST2.BAT" 
+               />
+    <Shortcut Id="CRASHMEShortcut03" Name="TEST3.BAT" 
+              Description="TEST 3" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\TEST3.BAT" 
+               />
+    <Shortcut Id="CRASHMEShortcut04" 
               Name="license.rtf"  LongName="license.rtf"
               Description="CRASHME License" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\license.rtf" 
               />
-    <Shortcut Id="CRASHMEShortcut3" 
+    <Shortcut Id="CRASHMEShortcut05" 
               Name="crashme.htm"  LongName="crashme.html"
               Description="CRASHME Documentation" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\crashme.html" 
               />
-    <Shortcut Id="CRASHMEShortcut4" 
+    <Shortcut Id="CRASHMEShortcut06" 
               Name="crashme.htm"  LongName="crashme.txt"
               Description="CRASHME Documentation" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\crashme.txt" 
+              />
+    <Shortcut Id="CRASHMEShortcut07" 
+              Name="SHORT5.DAT"  LongName="Crashme"
+              Description="CRASHME Installation Folder" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]" 
               />
    </Component>
   </DirectoryRef>
