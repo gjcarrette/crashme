@@ -178,6 +178,10 @@
 				RelativePath=".\mt19937ar.c"
 				>
 			</File>
+			<File
+				RelativePath=".\vnsq.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -186,6 +190,10 @@
 			>
 			<File
 				RelativePath=".\mt19937ar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vnsq.h"
 				>
 			</File>
 		</Filter>

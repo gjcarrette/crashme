@@ -156,6 +156,7 @@ void prng_setup(long nseed);
 
 #define PRNG_TYPE_RAND 1
 #define PRNG_TYPE_MT 2
+#define PRNG_TYPE_VNSQ 3
 
 int prng_type;
 
@@ -165,6 +166,8 @@ int prng_type;
 #else
 #define PRNG_DEFAULT PRNG_TYPE_RAND
 #endif
+
+#include "vnsq.h"
 
 typedef void (*BADBOY)();
 
@@ -349,6 +352,14 @@ void compute_badboy_1(long n)
     case PRNG_TYPE_RAND:
       for(j=0;j<n;++j) the_data[j] = (rand() >> 7) & 0xFF;
       break;
+    case PRNG_TYPE_VNSQ:
+      for(j=0;(j+1)<n; j += 2)
+	{
+	  unsigned long u1 = vnsq_int32();
+	  the_data[j+0] = (u1 >> 1) & 0xFF;
+	  the_data[j+1] = (u1 >> 9) & 0xFF;
+	}
+      break;
     default:
       break;
     }
@@ -520,6 +531,8 @@ void prng_setup(long nseed)
     prng_type = PRNG_TYPE_RAND;
   else if (strcmp(prng_name,"MT") == 0)
     prng_type = PRNG_TYPE_MT;
+  else if (strcmp(prng_name,"VNSQ") == 0)
+    prng_type = PRNG_TYPE_VNSQ;
   else
     prng_type = PRNG_DEFAULT;
 
@@ -534,6 +547,10 @@ void prng_setup(long nseed)
     case PRNG_TYPE_RAND:
       sprintf(notes,"CRASHPRNG %s %d C runtime library rand.",prng_name,prng_type);
       srand(nseed);
+      break;
+    case PRNG_TYPE_VNSQ:
+      sprintf(notes,"CRASHPRNG %s %d VN middle square.",prng_name,prng_type);
+      init_vnsq(nseed);
       break;
     default:
       sprintf(notes,"CRASHPRNG %s %d UNKNOWN",prng_name,prng_type);
@@ -638,12 +655,17 @@ void record_status(long n)
 
 void summarize_status(void)
 {struct status_list *l;
+ int n = 0; 
  sprintf(notes,"exit status ... number of cases");
  note(2);
  for(l=slist;l != NULL; l = l->next)
-   {sprintf(notes,"exit status ... number of cases");
-    sprintf(notes,"%11d ... %5d",l->status,l->count);
-    note(2);}}
+   {sprintf(notes,"%11d ... %5d",l->status,l->count);
+    note(2);
+    ++n;}
+ sprintf(notes,"");
+ note(2);
+ sprintf(notes,"Number of distinct cases = %d",n);
+ note(2);}
 
 #ifndef WIN32
 
