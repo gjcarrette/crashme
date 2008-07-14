@@ -1,42 +1,42 @@
 <!doctype html public "-//IETF//DTD HTML//EN//2.0">
 <!-- 
-     This document is Copyright 1996 by George J. Carrette, 
+     This document is Copyright 1996-2008 by George J. Carrette, 
      All Rights Reserved.
  -->  
 <html>
 <head><title>CRASHME: Random input testing.</title>
-<META name="description"
+<meta name="description"
   content="Using random input testing on the instruction set of a computation environment.">
-<META name="keywords"
+<meta name="keywords"
       content="security, testing, robustness, cybernetics">
 </head>
 <body>
-<H1>CRASHME: Random input testing</H1>
+<h1>CRASHME: Random input testing</h1>
 
-<P>Copyright &copy; 1996 by <a href="gjc@world.std.com">George J. Carrette</a>. All rights Reserved.
+<p>Copyright &copy; 1996-2008 by George J. Carrette. All rights Reserved.
 
-<P>See the source crashme.c for reports of system crashes.
+<p>See the source crashme.c for reports of system crashes.
 Source code is available as a gunzip tar file, 
 <a href="crashme.tgz">crashme.tgz</a> or zip file 
 <a href="crashme.zip">crashme.zip</a> or the old unix shar archive,
 <a href="ftp://ftp.std.com/pub/gjc/crashme-2.4-shar">crashme-2.4-shar</a>.
 or <a href="crashme_i386.zip">crashme_i386.zip</a> an
-<a href="http://www.cdrom.com/pub/infozip/">INFO-ZIP</a> archive</TD>
+<a href="http://www.cdrom.com/pub/infozip/">INFO-ZIP</a> archive</td>
 of windows intel binaries, ready to run.
 
 
-<P>
+<p>
 Acknowledgements.
 
-<P>
+<p>
 Many people have provided suggestions and comments and
 feedback. Some in private email and some as published on the comp.arch
 newsgroups.  But as the author of this gross hack I take full
 responsibility for any errors in the information presented.
 
-<HR>
+<hr>
 
-<P>
+<p>
 
 A bit of background on crashme. It is a tool for testing the
 robustness of an operating environment using a technique of "Random
@@ -45,36 +45,36 @@ book Cybernetics by Norbert Wiener, but which any parent who has
 observed his children playing and learning would be well disposed to
 describe in detail. There is a wealth of information on
 the web containing references to Mr Weiner and his work,
-see for example <A href="http://www.ams.org/publications/notices/199504/wiener.html">www.ams.org</a> or <a href="http://rleweb.mit.edu/g-atshst.htm">rleweb.mit.edu</a>.
+see for example <a href="http://www.ams.org/publications/notices/199504/wiener.html">www.ams.org</a> or <a href="http://rleweb.mit.edu/g-atshst.htm">rleweb.mit.edu</a>.
 
-<UL>
-<LI>The operating environment under consideration is the user-mode process.
+<ul>
+<li>The operating environment under consideration is the user-mode process.
 
-<LI>The Random Input is provided by the execution of a sequence of pseudo-random data as an instruction stream.
+<li>The Random Input is provided by the execution of a sequence of pseudo-random data as an instruction stream.
 
-<LI>The response analysis is to catch and record machine and software
+<li>The response analysis is to catch and record machine and software
 generated exceptions/errors/signals and to retry using new random data
 in both the current user-mode process and in newly created
 subprocesses.
 
-</UL>
+</ul>
 
-<HR>
+<hr>
 
-<P>Notes for release 2.2 of Crashme. 9-MAY-1994 GJC@WORLD.STD.COM
+<p>Notes for release 2.2 of Crashme. 9-MAY-1994 GJC@WORLD.STD.COM
 
-<P>Added the X.Y syntax for the NBYTES argument. This may run faster,
+<p>Added the X.Y syntax for the NBYTES argument. This may run faster,
 doing more tests per second. A reasonable value for Y would be
 the number of bytes in a machine instruction.
 
-<P>Many people have suggested that the output of previous versions was
+<p>Many people have suggested that the output of previous versions was
 far too verbose, and that that was not only annoying but also
 effectively slowing down the program. Therefore there is a new argument
 available after the subprocess control argument, which is a verboseness
 level from 0 to 5. Using a level of 2 will print out only summary
 information about the runs. e.g.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 $ crashme +2000 666 50 00:30:00 2
 Crashme: (c) Copyright 1990, 1991 George J. Carrette
 Version: 1.7 25-SEP-1991
@@ -88,25 +88,25 @@ exit status ... number of cases
        1108 ...    19
           1 ...   432
          12 ...   137
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>The table of exit status codes and frequencies is a new interesting
+<p>The table of exit status codes and frequencies is a new interesting
 aspect of the test. This test was run on a VMS system, so that we have
 a normal process exit 432 times, access violation 137 times,
 and reserved operand fault 19 times, etc. As the number of tries goes
 up (50 in this case) we would expect that the number of normal process
 exits to go down.
 
-<P>If you define an environment variable (or vms logical name)
+<p>If you define an environment variable (or vms logical name)
 called CRASHLOG then each subprocess will append to a file the
 arguments it was given. In that way you can recover what instance
 possibly caused a crash, but remember that without frequent disk fsync
 operations most Unix systems will leave a CRASHLOG that is out of
 date by a few minutes or more.
 
-<P>Here is some output supplied by nik@infonode.ingr.com on one of his machines.
+<p>Here is some output supplied by nik@infonode.ingr.com on one of his machines.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 Processor : Intergraph Clipper C300 RISC processor
             16Mb memory + 4k I cache and 4K D cache
 
@@ -127,103 +127,103 @@ exit status ... number of cases
         132 ...   430
         139 ...    18
       12800 ...   567
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>The status values here could be decoded by reading the
+<p>The status values here could be decoded by reading the
 documentation for the "wait" system procedure, and looking up the
 correct part of the value in the sys_errlist[] array. That is left as
 an exersize for the reader.
 
-<HR>
+<hr>
 
-<P>To compile, some systems may need #include &lt;sys/types.h&gt;.
+<p>To compile, some systems may need #include &lt;sys/types.h&gt;.
 
-<P>Also, note the conditionalized code in bad_malloc. If your system
+<p>Also, note the conditionalized code in bad_malloc. If your system
 only gets the signal "segmentation violation" then you may need
 to consider conditionalizations along this line. 
 
-<P>However, on a machine with a segmented address space, that has
+<p>However, on a machine with a segmented address space, that has
 "instructions" in one segment and "data" in another, it is highly
 unlikely that the code for setting up and invoking the "void
 (*badboy)()" will have any interesting effect. Nothing other than an
 easily handled SIGSEGV will result in the inner testing loop.
 
-<P>Some PDP-11 systems would be examples of this situation (different
+<p>Some PDP-11 systems would be examples of this situation (different
 I and D space).
 
-<P>---MACHINE O/S SPECIFIC NOTES---
+<p>---MACHINE O/S SPECIFIC NOTES---
 
-<P>MACHINE:: DEC C (OPENVMS ALPHA AXP):
+<p>MACHINE:: DEC C (OPENVMS ALPHA AXP):
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 $ CC/PREFIX=ALL/NOOPTIMIZE CRASHME
 $ LINK CRASHME
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>New for version 2.2 code has been added to hackishly manipulate
+<p>New for version 2.2 code has been added to hackishly manipulate
 the Procedure Descriptor data format. It seems be executing random
 instructions like we would want.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 #if defined(__ALPHA) && defined(VMS) && !defined(NOCASTAWAY)
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>Without this hack crashme on this platform has very little chance
+<p>Without this hack crashme on this platform has very little chance
 of causing anything other than a SIGBUS bus error.
 
-<P>Perhaps a smart "learning" mode of random-data creation could
+<p>Perhaps a smart "learning" mode of random-data creation could
 achieve the same ends, maximizing some measurement of punishment.
-<A href="http://www.aaai.org/Conferences/National/1996/Tutorials/koza.html">Genetic programming</a> might be useful.
+<a href="http://www.aaai.org/Conferences/National/1996/Tutorials/koza.html">Genetic programming</a> might be useful.
 
-<P>Test I've tried:
+<p>Test I've tried:
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 $crashme +1000.48 0 100 03:00:00 2
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>MACHINE:: Windows NT:
+<p>MACHINE:: Windows NT:
  
-<P>The only files needed are crashme.c,makefile.wnt, and make.bat. cd
+<p>The only files needed are crashme.c,makefile.wnt, and make.bat. cd
 into the directory containing the files and you can make two versions.
 crashme and crashmep (posix).
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 &gt;make  
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>In WIN32 subsystem the subprocess-all-at-once mode has not been
+<p>In WIN32 subsystem the subprocess-all-at-once mode has not been
 implemented, but the sequential (-nsub) and timed modes have been
 implemented.
 
-<P>In posix subsystem you must use the full name of the file in the
+<p>In posix subsystem you must use the full name of the file in the
 command if you want to generate subprocesses.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 &gt;crashmep.exe .....
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
 On an 486DX2-66 machine the following caused a totally
 wedged up machine in the Windows NT final release. (Build 511).
 This was built in WIN32 mode with debugging on.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 &gt;crashme +1000 666 50 12:00:00 3
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>In the posix subsystem the more verbose modes were not ever observed
+<p>In the posix subsystem the more verbose modes were not ever observed
 to go through more than 2 setjmp/longjmp cycles on a given random
 number seed.  In the WIN32 subsystem there was a greater variety of
 fault conditions.
 
-<P>The above crash took place after about 6 hours of running. Final
+<p>The above crash took place after about 6 hours of running. Final
 subprocess arguments were +1000 24131 50, and we verified twice that
 invoking the following crashed the OS within seconds.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 &gt;crashme +1000 24131 50
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>I have always been concerned that the more complex the unprotected
+<p>I have always been concerned that the more complex the unprotected
 data in the user address space the more likely it is for a program
 being developed to generate inscrutable errors that an "application
 developer" level of person will be unable to understand.  And worse,
@@ -232,32 +232,32 @@ delaying projects and risking deadline failures, and even worse,
 forcing management to bring in super-experienced (and limited
 availability) people into a project in order to get it going again.
 
-<P>The WINDOWS NT client-server model is one way around this problem.
+<p>The WINDOWS NT client-server model is one way around this problem.
 Having a subsystem in a different address space is one way to protect
 complex data manipulated through an API. However, as page 127 of
 "Inside Windows NT" there are some optimizations that make an unspoken
 trade-off between the robustness afforded by a protected seperate
 address space and efficiency of implementation on an API.
 
-<P>Robustness and 'scrutability of failure situations' vs efficiency.
+<p>Robustness and 'scrutability of failure situations' vs efficiency.
 
-<P>MACHINE:: OS/2
+<p>MACHINE:: OS/2
 
-<P>It has been reported that this runs when compiled gcc crashme.c -o
+<p>It has been reported that this runs when compiled gcc crashme.c -o
 crashme.exe In order to disable the dialog boxes reporting abnormal
 process termination, add this to CONFIG.SYS: AUTOFAIL=YES. Or the
 following code to main:
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>Another person says that Emx is the only c compiler under OS/2 that
+<p>Another person says that Emx is the only c compiler under OS/2 that
 supports fork.
 
-<HR>
+<hr>
 
-<P>
+<p>
 Survey of Procedure Descriptor Usage. The emphasis here is on
 currently shipping products. The program pddet.c included
 with the distribution can be used to determine some of this
@@ -265,7 +265,7 @@ information. Note that in some environments, e.g. Microsoft C++ 4.0
 the results of PDDET will be different depending on the compilation
 modes chosen: debug verses release.
 
-<BLOCKQUOTE><PRE><TT>
+<blockquote><pre><tt>
 Architecture    |D| Desc | Env | Reg | Apos | Atyp | Rpos | Rtyp | 
 ------------------------------------------------------------------
 VAX             |2| No   | No  | Yes | No   | No   | No   | No   |
@@ -321,9 +321,9 @@ POWERPC
 [TABLE-OF-CONTENTS]
 [EXCEPTION-INFO]
 
-</TT></PRE></BLOCKQUOTE>
+</tt></pre></blockquote>
 
-<P>
+<p>
 [Editorial comment taken from comp.arch:] Not to sound picky about
 this, but this is not really part of the POWER/PowerPC architecture.
 There is no special support for this in the hardware, it is just the
@@ -331,12 +331,35 @@ scheme the software designers came up with in order to support shared
 libraries. Other schemes would be possible. [GJC comment] Pretty
 much true for every architecture.
 
-<P>PA-RISC HPUX.
+<p>PA-RISC HPUX.
 
-<P>The pddet.c program was used, and suggested descriptors of 8
+<p>The pddet.c program was used, and suggested descriptors of 8
 bytes long. The -examine 8 argument showed what appeared to
 be a 4-byte starting PC followed by a table of contents.
 Note: If somebody knows what /usr/include/sys/*.h file to use
 for this, please let me know.
 
-</BODY>
+
+<p>Notes for release 2.6 of Crashme. 13-JUL-2008 GJC.
+
+<p>CRASHPRNG is a new environment variable letting you change the
+pseudorandom number generator used.
+
+<table border="1">
+<tr><th>CRASHPRNG</th><th>description</th></tr>
+<tr><td>RAND</td><td>C runtime library rand</td></tr>
+<tr><td>MT (default)</td>
+    <td>Mersenne twister coded by Takuji Nishimura and Makoto Matsumoto.</td></tr>
+<tr><td>VNSQ</td>
+    <td>A variation of the middle square method</td></tr>
+</table>
+
+<!-- Notes:
+     Any PRNG collection designed for monte carlo methods written in ANSI C would
+     be useful here. This one looks nice:
+     http://statmath.wu-wien.ac.at/prng/doc/prng.html
+     Also of course http://www.stat.fsu.edu/pub/diehard/
+-->
+
+</body>
+<html>

@@ -46,6 +46,9 @@
      <File Id="FILE15.DAT" Name="FILE15.DAT" LongName="TEST2.BAT" Source="TEST2.BAT" DiskId="1"/>
      <File Id="FILE16.DAT" Name="FILE16.DAT" LongName="SETUP.CMD" Source="SETUP.CMD" DiskId="1"/>
      <File Id="FILE17.DAT" Name="FILE17.DAT" LongName="TEST3.BAT" Source="TEST3.BAT" DiskId="1"/>
+     <File Id="FILE18.DAT" Name="FILE18.DAT" LongName="vnsq.h" Source="vnsq.h" DiskId="1"/>
+     <File Id="FILE19.DAT" Name="FILE19.DAT" LongName="vnsq.c" Source="vnsq.c" DiskId="1"/>
+     <File Id="FILE20.DAT" Name="FILE20.DAT" LongName="TEST4.BAT" Source="TEST4.BAT" DiskId="1"/>
      </Component>
     </Directory>
    </Directory>
@@ -68,25 +71,30 @@
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\TEST3.BAT" 
                />
-    <Shortcut Id="CRASHMEShortcut04" 
+    <Shortcut Id="CRASHMEShortcut04" Name="TEST4.BAT" 
+              Description="TEST 4" 
+              Directory="CRASHMEProgramsFolder" 
+              Target="[CRASHMEDIR]\TEST4.BAT" 
+               />
+    <Shortcut Id="CRASHMEShortcut05" 
               Name="license.rtf"  LongName="license.rtf"
               Description="CRASHME License" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\license.rtf" 
               />
-    <Shortcut Id="CRASHMEShortcut05" 
+    <Shortcut Id="CRASHMEShortcut06" 
               Name="crashme.htm"  LongName="crashme.html"
               Description="CRASHME Documentation" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\crashme.html" 
               />
-    <Shortcut Id="CRASHMEShortcut06" 
+    <Shortcut Id="CRASHMEShortcut07" 
               Name="crashme.htm"  LongName="crashme.txt"
               Description="CRASHME Documentation" 
               Directory="CRASHMEProgramsFolder" 
               Target="[CRASHMEDIR]\crashme.txt" 
               />
-    <Shortcut Id="CRASHMEShortcut07" 
+    <Shortcut Id="CRASHMEShortcut08" 
               Name="SHORT5.DAT"  LongName="Crashme"
               Description="CRASHME Installation Folder" 
               Directory="CRASHMEProgramsFolder" 
