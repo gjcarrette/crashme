@@ -65,7 +65,7 @@ struct v *vprod(x,y)
      struct v *x,*y;
 {struct v *z;
  long j;
- z = vcons(x->n);
+ z = vcons(x->n, 0.0);
  for(j=0;j<x->n;++j) z->a[j] = x->a[j] * y->a[j];
  return(z);}
 
@@ -274,7 +274,7 @@ int adeltl(a,b)
  else if (a->delta > b->delta) return(1);
  else return(0);}
 
-main(argc,argv)
+int main(argc,argv)
      int argc;
      char **argv;
 {struct apair all[10];
@@ -310,7 +310,7 @@ main(argc,argv)
  if (ebytes > 0)
    {printf("%10s %10s %s\n","procedure","address","examine");
     for(j=0;j<n;++j)
-      {printf("%10s %10d ",all[j].name,all[j].addr);
+      {printf("%10s %10ld ",all[j].name,(long)all[j].addr);
        data = (unsigned char *) all[j].addr;
        if (j > 0)
 	 prev_data = (unsigned char *) all[j-1].addr;
@@ -342,8 +342,8 @@ main(argc,argv)
 	    break;}}
     else
       delta = 0;
-    printf("%10s %10d %10d\n",all[j].name,all[j].addr,delta);}
- printf("min_delta = %d, max_delta = %d\n",min_delta,max_delta);
+    printf("%10s %10ld %10ld\n",all[j].name,(long)all[j].addr,(long)delta);}
+ printf("min_delta = %ld, max_delta = %ld\n",(long)min_delta,(long)max_delta);
  if (min_delta == max_delta)
    sayarch("probably uses");
  else
@@ -351,7 +351,7 @@ main(argc,argv)
     printf("%10s %s\n","delta","count");
     for(d=0,k=0;k<n;++k)
       if (deltas[k].count > 0)
-	{printf("%10d %d\n",deltas[k].delta,deltas[k].count);
+	{printf("%10ld %ld\n",(long)deltas[k].delta,(long)deltas[k].count);
 	 ++d;}
     if (d > 4)
       sayarch("probably does not use");
