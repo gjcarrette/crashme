@@ -86,6 +86,7 @@ then the stress test will not be as potent as it would otherwise be.
 Beware: This program can crash your computer if the
 operating system or hardware of same is buggy. User data may be lost.
 .SH AUTHOR
-George J Carrette. GJC\@world.std.com
+George J Carrette. GJC\@alum.mit.edu
+http://people.delphiforums.com/gjc/crashme.html
 .SH VERSION
 2.4 20-MAY-1994
