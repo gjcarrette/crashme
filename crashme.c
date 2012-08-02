@@ -152,6 +152,15 @@ a script.
 #include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+/* i am using XCODE command line tools under Lion */
+#define _strdup strdup
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
+
 void prng_setup(long nseed);
 
 #define PRNG_TYPE_RAND 1
@@ -257,7 +266,15 @@ unsigned char *bad_malloc(long n)
 	      PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
- return(data);}
+#ifdef __APPLE__
+ int pagesize;
+ pagesize = getpagesize();
+ if (mprotect((void *)((((long)data)/pagesize)*pagesize),
+	      ((n/pagesize)+1)*pagesize,
+	      PROT_READ|PROT_WRITE|PROT_EXEC))
+   perror("mprotect");
+#endif
+  return(data);}
 
 #ifndef WIN32
 
@@ -502,7 +519,7 @@ int main(int argc, char **argv)
 
 void copyright_note1(long n)
 {
- sprintf(notes,"Crashme: (c) Copyright 1990-2008 George J. Carrette");
+ sprintf(notes,"Crashme: (c) Copyright 1990-2012 George J. Carrette");
  note(n);
  sprintf(notes,"Version: %s",crashme_version);
  note(n);
