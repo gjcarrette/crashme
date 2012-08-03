@@ -267,6 +267,10 @@ unsigned char *bad_malloc(long n)
    perror("mprotect");
 #endif
 #ifdef __APPLE__
+ /* if we don't do this on the 64-bit architectures
+    then all we get out of our badboy() calls
+    is a nice safe "bus error" signal.
+ */
  int pagesize;
  pagesize = getpagesize();
  if (mprotect((void *)((((long)data)/pagesize)*pagesize),
@@ -324,7 +328,7 @@ void my_signal(int sig,void (*func)())
 #endif /* SA_ONESHOT */
 }
  
-set_up_signals(void)
+void set_up_signals(void)
 {my_signal(SIGILL,again_handler);
 #ifdef SIGTRAP
  my_signal(SIGTRAP,again_handler);
@@ -396,7 +400,7 @@ void proto_badboy(void)
 #include <pdscdef.h>
 #endif
 
-BADBOY castaway(char *dat)
+BADBOY castaway(unsigned char *dat)
 {
 #if defined(VAX) && !defined(NOCASTAWAY)
   /* register save mask avoids bashing our callers locals */
@@ -495,15 +499,15 @@ int main(int argc, char **argv)
     note(1);
     record_note();
     if (strchr(argv[4],':'))
-      {sscanf(argv[4],"%d:%d:%d",&hrs,&mns,&scs);
+      {sscanf(argv[4],"%ld:%ld:%ld",&hrs,&mns,&scs);
        tflag = 1;
        nsubs = (((hrs * 60) + mns) * 60) + scs;
-       sprintf(notes,"Subprocess run for %d seconds (%d %02d:%02d:%02d)",
+       sprintf(notes,"Subprocess run for %ld seconds (%ld %02ld:%02ld:%02ld)",
 	       nsubs, hrs / 24, hrs % 24,mns,scs);}
     else
       {tflag = 0;
        nsubs = atol(argv[4]);
-       sprintf(notes,"Creating %d crashme subprocesses",nsubs);}
+       sprintf(notes,"Creating %ld crashme subprocesses",nsubs);}
     note(1);
     prng_setup(0);
     record_note();
@@ -582,19 +586,19 @@ void old_main(int argc,char **argv)
 {char *ptr;
  copyright_note(3);
  nbytes = atol(argv[1]);
- if (ptr = strchr(argv[1],'.'))
+ if ((ptr = strchr(argv[1],'.')) != NULL)
    incptr = atol(&ptr[1]);
  if (argv[1][0] == '+') malloc_flag = 1;
  nseed = atol(argv[2]);
  ntrys = atol(argv[3]);
- sprintf(notes,"crashme %s%ld.%d %ld %ld",
+ sprintf(notes,"crashme %s%ld.%ld %ld %ld",
 	 (malloc_flag == 0) ? "" : "+",nbytes,incptr,nseed,ntrys);
  note(3);
  record_note();
  if (malloc_flag == 0)
    {the_data = bad_malloc((nbytes < 0) ? -nbytes : nbytes);
     badboy = castaway(the_data);
-    sprintf(notes,"Badboy at %d. 0x%X",badboy,badboy);
+    sprintf(notes,"Badboy at %ld. 0x%lX",(long)badboy,(long)badboy);
     note(3);}
  prng_setup(nseed);
 #ifdef WIN32
@@ -623,9 +627,9 @@ void badboy_loop(void)
  for(i=0;i<ntrys;++i)
    {compute_badboy();
     if (offset)
-      sprintf(notes,"try %d, offset %d",i,offset);
+      sprintf(notes,"try %d, offset %ld",i,offset);
     else if (malloc_flag == 1)
-      sprintf(notes,"try %d, Badboy at %d. 0x%X",i,badboy,badboy);
+      sprintf(notes,"try %d, Badboy at %ld. 0x%lX",i,(long)badboy,(long)badboy);
     else
       sprintf(notes,"try %d",i);
     note(5);
@@ -676,10 +680,10 @@ void summarize_status(void)
  sprintf(notes,"exit status ... number of cases");
  note(2);
  for(l=slist;l != NULL; l = l->next)
-   {sprintf(notes,"%11d ... %5d",l->status,l->count);
+   {sprintf(notes,"%11ld ... %5ld",(long)l->status,(long)l->count);
     note(2);
     ++n;}
- sprintf(notes,"");
+ strcpy(notes,"");
  note(2);
  sprintf(notes,"Number of distinct cases = %d",n);
  note(2);}
@@ -699,8 +703,8 @@ void monitor_fcn(int sig)
  if (monitor_active)
    {++monitor_count;
     if (monitor_count >= monitor_limit)
-      {sprintf(notes,"time limit reached on pid %d 0x%X. using kill.",
-	       monitor_pid,monitor_pid);
+      {sprintf(notes,"time limit reached on pid %ld 0x%lX. using kill.",
+	       (long)monitor_pid,(long)monitor_pid);
        note(3);
        status = kill(monitor_pid,SIGKILL);
        if (status < 0)
@@ -711,6 +715,7 @@ void monitor_fcn(int sig)
 void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 {long j,pid,n,seq,total_time,dys,hrs,mns,scs;
  int status;
+ long pstatus;
  char arg2[20],arg4[20],arg5[20];
  time_t before_time,after_time;
  if (tflag == 1)
@@ -726,32 +731,32 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
    {my_signal(SIGALRM,monitor_fcn);
     alarm(monitor_period);}
  time(&before_time);
- sprintf(arg5,"%d",verbose_level);
+ sprintf(arg5,"%ld",verbose_level);
  for(j=0;j<n;++j)
-   {sprintf(arg2,"%d",sr+j);
-    sprintf(arg4,"%d",j+1);
+   {sprintf(arg2,"%ld",sr+j);
+    sprintf(arg4,"%ld",j+1);
 #ifdef VMS
-    status = vfork();
+    pstatus = vfork();
 #else
-    status = fork();
+    pstatus = fork();
 #endif
-    if (status == 0)
-      {status = execl(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,0);
+    if (pstatus == 0)
+      {status = execl(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,NULL);
        if (status == -1)
 	 {perror(cmd);
 	  exit(1);}}
-    else if (status < 0)
-      perror(cmd);
+    else if (pstatus < 0)
+      perror("fork");
     else
-      {sprintf(notes,"pid = %d 0x%X (subprocess %d)",status,status,j+1);
+      {sprintf(notes,"pid = %ld 0x%lX (subprocess %ld)",pstatus,pstatus,j+1);
        note(3);
        if (seq == 1)
-	 {monitor_pid = status;
+	 {monitor_pid = pstatus;
 	  monitor_count = 0;
 	  monitor_active = 1;
 	  while((pid = wait(&status)) > 0)
 	    {monitor_active = 0;
-	     sprintf(notes,"pid %d 0x%X exited with status %d",pid,pid,status);
+	      sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
 	     note(3);
 	     record_status(status);
 	     record_note();
@@ -760,13 +765,13 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 	 {time(&after_time);
 	  total_time = after_time - before_time;
 	  if (total_time >= nsubs)
-	    {sprintf(notes,"Time limit reached after run %d",j+1);
+	    {sprintf(notes,"Time limit reached after run %ld",j+1);
 	     note(2);
 	     record_note();
 	     break;}}}}
  if (seq == 0)
    while((pid = wait(&status)) > 0)
-     {sprintf(notes,"pid %d 0x%X exited with status %d",pid,pid,status);
+     {sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
       note(3);
       record_status(status);
       record_note();
@@ -781,8 +786,8 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  mns = mns % 60;
  hrs = hrs % 24;
  sprintf(notes,
-	 "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
-	 total_time,dys,hrs,mns,scs);
+	 "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
+	 (long)total_time,(long)dys,(long)hrs,(long)mns,(long)scs);
  note(1);}
 
 #else

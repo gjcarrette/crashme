@@ -281,6 +281,12 @@ int main(argc,argv)
  struct adelt deltas[10];
  long j,k,n=10,min_delta,max_delta,delta,d,ebytes=0;
  unsigned char *data,*prev_data;
+ printf("Crashme(pddet): (c) Copyright 1990-2012 George J. Carrette\n");
+ printf("From http://alum.mit.edu/www/gjc/crashme.html");
+ printf("sizeof(char)   = %ld\n", (long) sizeof(char));
+ printf("sizeof(char *) = %ld\n", (long) sizeof(char *));
+ printf("sizeof(int)    = %ld\n", (long) sizeof(int));
+ printf("sizeof(long)   = %ld\n", (long) sizeof(long));
  for(j=1;(j+1)<argc;j += 2)
    {if (strcmp(argv[j],"-examine") == 0)
       ebytes = atol(argv[j+1]);}
