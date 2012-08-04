@@ -51,7 +51,9 @@ crashme.tgz: $(DIST_FILES)
 check:
 	nsgmls -s crashme.html
 
-dist: crashme.zip crashme.tgz crashme_i386.zip
+dist: crashme.zip crashme.tgz 
+
+#crashme_i386.zip
 
 CRASHME_I386=release/crashme.exe release/pddet.exe
 
@@ -109,6 +111,9 @@ ptest9:
 ptest10:
 	./crashme +4096 666 100 00:00:05 4
 
+ptest11:
+	./crashme +4096 666 250 00:03:00 4
+
 
 # here are some tests taken from the BAT files done for windows.
 
@@ -135,4 +140,16 @@ test1cb:
 
 test1cc:
 	sh -c "CRASHPRNG=VNSQ;export CRASHPRNG;CRASHLOG=$(LOG_DIR)/crashme-test1-vnsq.log;export CRASHLOG;./crashme 8192 666 100 00:00:30 3"
+
+
+# Use this to disable all crash report generation for the current user.
+
+
+report-crash-stop:
+	-launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
+	-sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
+
+report-crash-start:
+	-launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
+	-sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 
