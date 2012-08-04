@@ -35,7 +35,12 @@ crashme.txt: crashme.man
 
 DIST_FILES = crashme.man crashme.c crashme.html \
              crashme.vms-opt descrip.mms makefile \
-             pddet.c crashme.txt crashme.dsw crashme.dsp pddet.dsp
+             pddet.c crashme.txt
+
+# These files were in the distribution. 
+# but they got lost and it isn't clear
+
+# crashme.dsw crashme.dsp pddet.dsp
 
 crashme.zip: $(DIST_FILES)
 	zip -D -j crashme.zip $(DIST_FILES)

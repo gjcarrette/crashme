@@ -788,7 +788,9 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  sprintf(notes,
 	 "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
 	 (long)total_time,(long)dys,(long)hrs,(long)mns,(long)scs);
- note(1);}
+ note(1);
+ summarize_status();
+}
 
 #else
 
