@@ -261,6 +261,10 @@ jmp_buf again_buff;
 unsigned char *bad_malloc(long n)
 {unsigned char *data;
  data = (unsigned char *) malloc(n);
+ if (data == NULL) {
+   perror("malloc");
+   return(NULL);
+ }
 #ifdef pyr
  if (mprotect(((int)data/PAGSIZ)*PAGSIZ, (n/PAGSIZ+1)*PAGSIZ,
 	      PROT_READ|PROT_WRITE|PROT_EXEC))
