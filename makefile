@@ -8,10 +8,12 @@ all: crashme pddet
 # make "CFLAGS=-Wall -DPRNG_MT -g"xo CC=gcc
 
 crashme: crashme.o vnsq.o mt19937ar.o
+	$(CC) -o crashme crashme.o vnsq.o mt19937ar.o
 
 crashme.o: crashme.c
 
 pddet:	pddet.o
+	$(CC) -o pddet pddet.o
 
 pddet.o: pddet.c
 
