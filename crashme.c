@@ -152,7 +152,7 @@ a script.
 #include <unistd.h>
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 /* i am using XCODE command line tools under Lion */
 #define _strdup strdup
 #include <sys/types.h>
@@ -270,7 +270,7 @@ unsigned char *bad_malloc(long n)
 	      PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
  /* if we don't do this on the 64-bit architectures
     then all we get out of our badboy() calls
     is a nice safe "bus error" signal.
