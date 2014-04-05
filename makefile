@@ -25,7 +25,7 @@ showdefs:
 	$(CC) -dM -E - < /dev/null
 
 clean:
-	-rm crashme pddet *.o core crashme.txt crashme.zip \
+	-rm crashme pddet *.o core crashme.zip \
             crashme.tgz crashme_i386.zip *.plg *.ncb *.opt
 	-rm -rf release debug
 
