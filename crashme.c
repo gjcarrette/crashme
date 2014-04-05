@@ -1,10 +1,10 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.6 12-JUL-2008";
+char *crashme_version = "2.7 4-APR-2014";
 
 /*
- *             COPYRIGHT (c) 1990-2008 BY        *
+ *             COPYRIGHT (c) 1990-2014 BY        *
  *  GEORGE J. CARRETTE, CONCORD, MASSACHUSETTS.  *
  *             ALL RIGHTS RESERVED               *
 
@@ -62,7 +62,8 @@ Version Date         Description
  2.3    11-MAY-1994  Added _IBMRT2 and _POWER code.
  2.4    20-MAY-1994  Added __hpux. Linux from jik@cam.ov.com.
  2.5     6-JUL-2008  more WIN32 support
- 2.6    12-JUL-2008  Option to use Mersenne twister pseudorandom number generator.
+ 2.6    12-JUL-2008  use Mersenne twister pseudorandom number generator.
+ 2.7     4-APR-2014  __APPLE__ port, fix linux 64 bit port.
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -150,16 +151,20 @@ a script.
 
 #ifdef linux
 #include <unistd.h>
+#include <sys/mman.h>
 #endif
 
 #if defined(__APPLE__) || defined(__FreeBSD__)
 /* i am using XCODE command line tools under Lion */
-#define _strdup strdup
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
 
+#ifdef WIN32
+#else
+#define _strdup strdup
+#endif
 
 void prng_setup(long nseed);
 
@@ -251,8 +256,13 @@ void note(long level)
  ++note_count;
  strcat(note_buffer,"\n");
  fputs(note_buffer,stdout);
+ fflush(stdout);
  if (logfile)
-   fputs(note_buffer,logfile);}
+   {
+     fputs(note_buffer,logfile);
+     fflush(logfile);
+   }
+}
 
 #ifndef WIN32
 jmp_buf again_buff;
@@ -270,7 +280,7 @@ unsigned char *bad_malloc(long n)
 	      PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
-#if defined(__APPLE__) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__) || defined(linux)
  /* if we don't do this on the 64-bit architectures
     then all we get out of our badboy() calls
     is a nice safe "bus error" signal.
@@ -320,7 +330,7 @@ void my_signal(int sig,void (*func)())
 #else
  struct sigaction act;
  act.sa_handler = func;
- act.sa_mask = 0;
+ memset(&act.sa_mask, sizeof(act.sa_mask), 0);
 #ifdef linux
  act.sa_restorer = 0;
 #endif /* linux */
