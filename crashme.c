@@ -225,13 +225,13 @@ void record_note(void)
     {
       fflush(logfile);
       if ((subprocess_flag == 0) && (vfork_flag == 1))
-	{
-	  /* we have children. Closing and opening the file will provide a bit
-	     better output, avoiding the mixup, and without the complexity of
-	     a lock. */
-	  fclose(logfile);
-	  logfile = fopen(logfilename,"a");
-	}
+        {
+          /* we have children. Closing and opening the file will provide a bit
+             better output, avoiding the mixup, and without the complexity of
+             a lock. */
+          fclose(logfile);
+          logfile = fopen(logfilename,"a");
+        }
     }
   note_count = 0;
 }
@@ -277,7 +277,7 @@ unsigned char *bad_malloc(long n)
  }
 #ifdef pyr
  if (mprotect(((int)data/PAGSIZ)*PAGSIZ, (n/PAGSIZ+1)*PAGSIZ,
-	      PROT_READ|PROT_WRITE|PROT_EXEC))
+              PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(linux)
@@ -288,8 +288,8 @@ unsigned char *bad_malloc(long n)
  int pagesize;
  pagesize = getpagesize();
  if (mprotect((void *)((((long)data)/pagesize)*pagesize),
-	      ((n/pagesize)+1)*pagesize,
-	      PROT_READ|PROT_WRITE|PROT_EXEC))
+              ((n/pagesize)+1)*pagesize,
+              PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
   return(data);}
@@ -375,13 +375,13 @@ void compute_badboy_1(long n)
     case PRNG_TYPE_MT:
 #ifdef PRNG_MT
       for(j=0;(j+3)<n; j += 4)
-	{
-	  unsigned long u = genrand_int32();
-	  the_data[j+0] = (u >> 24) & 0xFF;
-	  the_data[j+1] = (u >> 16) & 0xFF;
-	  the_data[j+2] = (u >> 8) & 0xFF;
-	  the_data[j+3] = (u >> 0) & 0xFF;
-	}
+        {
+          unsigned long u = genrand_int32();
+          the_data[j+0] = (u >> 24) & 0xFF;
+          the_data[j+1] = (u >> 16) & 0xFF;
+          the_data[j+2] = (u >> 8) & 0xFF;
+          the_data[j+3] = (u >> 0) & 0xFF;
+        }
 #endif
       break;
     case PRNG_TYPE_RAND:
@@ -389,11 +389,11 @@ void compute_badboy_1(long n)
       break;
     case PRNG_TYPE_VNSQ:
       for(j=0;(j+1)<n; j += 2)
-	{
-	  unsigned long u1 = vnsq_int32();
-	  the_data[j+0] = (u1 >> 1) & 0xFF;
-	  the_data[j+1] = (u1 >> 9) & 0xFF;
-	}
+        {
+          unsigned long u1 = vnsq_int32();
+          the_data[j+0] = (u1 >> 1) & 0xFF;
+          the_data[j+1] = (u1 >> 9) & 0xFF;
+        }
       break;
     default:
       break;
@@ -493,7 +493,7 @@ int main(int argc, char **argv)
      old_main(4,argv);
    }
  else if ((argc == 6) && ((strlen(argv[4]) == 0) ||
-			  (strcmp(argv[4],".") == 0)))
+                          (strcmp(argv[4],".") == 0)))
    {verbose_level = atol(argv[5]);
     open_record();
     old_main(4,argv);}
@@ -517,7 +517,7 @@ int main(int argc, char **argv)
        tflag = 1;
        nsubs = (((hrs * 60) + mns) * 60) + scs;
        sprintf(notes,"Subprocess run for %ld seconds (%ld %02ld:%02ld:%02ld)",
-	       nsubs, hrs / 24, hrs % 24,mns,scs);}
+               nsubs, hrs / 24, hrs % 24,mns,scs);}
     else
       {tflag = 0;
        nsubs = atol(argv[4]);
@@ -530,7 +530,7 @@ int main(int argc, char **argv)
  else
    {open_record();
     sprintf(notes,
-	    "crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verbose]");
+            "crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verbose]");
     note(0);}
  close_record();
  return(EXIT_SUCCESS);}
@@ -606,7 +606,7 @@ void old_main(int argc,char **argv)
  nseed = atol(argv[2]);
  ntrys = atol(argv[3]);
  sprintf(notes,"crashme %s%ld.%ld %ld %ld",
-	 (malloc_flag == 0) ? "" : "+",nbytes,incptr,nseed,ntrys);
+         (malloc_flag == 0) ? "" : "+",nbytes,incptr,nseed,ntrys);
  note(3);
  record_note();
  if (malloc_flag == 0)
@@ -617,8 +617,8 @@ void old_main(int argc,char **argv)
  prng_setup(nseed);
 #ifdef WIN32
  SetErrorMode(SEM_FAILCRITICALERRORS |
-	      SEM_NOGPFAULTERRORBOX |
-	      SEM_NOOPENFILEERRORBOX);
+              SEM_NOGPFAULTERRORBOX |
+              SEM_NOOPENFILEERRORBOX);
 #endif
  badboy_loop();}
 
@@ -631,7 +631,7 @@ DWORD exception_filter(DWORD value)
  fac = 07777 & (value >> 16);
  cod = 0xFFFF & value;
  sprintf(notes,"sev(%d)cus(%d)res(%d)fac(%d)code(%d)",
-	 sev,cus,res,fac,cod);
+         sev,cus,res,fac,cod);
  note(5);
  return(EXCEPTION_EXECUTE_HANDLER);}
 #endif
@@ -650,8 +650,8 @@ void badboy_loop(void)
 
 #ifdef WIN32
     __try {try_one_crash();
-	 sprintf(notes,"didn't barf!");
-	 note(5);}
+         sprintf(notes,"didn't barf!");
+         note(5);}
     __except(exception_filter(GetExceptionCode()))
       {}
 #else
@@ -718,12 +718,12 @@ void monitor_fcn(int sig)
    {++monitor_count;
     if (monitor_count >= monitor_limit)
       {sprintf(notes,"time limit reached on pid %ld 0x%lX. using kill.",
-	       (long)monitor_pid,(long)monitor_pid);
+               (long)monitor_pid,(long)monitor_pid);
        note(3);
        status = kill(monitor_pid,SIGKILL);
        if (status < 0)
-	 {sprintf(notes,"failed to kill process");
-	  note(3);}
+         {sprintf(notes,"failed to kill process");
+          note(3);}
        monitor_active = 0;}}}
 
 void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
@@ -757,32 +757,32 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
     if (pstatus == 0)
       {status = execl(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,NULL);
        if (status == -1)
-	 {perror(cmd);
-	  exit(1);}}
+         {perror(cmd);
+          exit(1);}}
     else if (pstatus < 0)
       perror("fork");
     else
       {sprintf(notes,"pid = %ld 0x%lX (subprocess %ld)",pstatus,pstatus,j+1);
        note(3);
        if (seq == 1)
-	 {monitor_pid = pstatus;
-	  monitor_count = 0;
-	  monitor_active = 1;
-	  while((pid = wait(&status)) > 0)
-	    {monitor_active = 0;
-	      sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
-	     note(3);
-	     record_status(status);
-	     record_note();
-	    }}
+         {monitor_pid = pstatus;
+          monitor_count = 0;
+          monitor_active = 1;
+          while((pid = wait(&status)) > 0)
+            {monitor_active = 0;
+              sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
+             note(3);
+             record_status(status);
+             record_note();
+            }}
        if (tflag == 1)
-	 {time(&after_time);
-	  total_time = after_time - before_time;
-	  if (total_time >= nsubs)
-	    {sprintf(notes,"Time limit reached after run %ld",j+1);
-	     note(2);
-	     record_note();
-	     break;}}}}
+         {time(&after_time);
+          total_time = after_time - before_time;
+          if (total_time >= nsubs)
+            {sprintf(notes,"Time limit reached after run %ld",j+1);
+             note(2);
+             record_note();
+             break;}}}}
  if (seq == 0)
    while((pid = wait(&status)) > 0)
      {sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
@@ -800,8 +800,8 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  mns = mns % 60;
  hrs = hrs % 24;
  sprintf(notes,
-	 "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
-	 (long)total_time,(long)dys,(long)hrs,(long)mns,(long)scs);
+         "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
+         (long)total_time,(long)dys,(long)hrs,(long)mns,(long)scs);
  note(1);
  summarize_status();
 }
@@ -826,7 +826,7 @@ void chk_CloseHandle(HANDLE h)
     note(3);}}
 
 int maxticks = 100; /* tenths of a second before forced termination
-		       of the subprocess */
+                       of the subprocess */
 
 void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
 {long j,n,seq,total_time,dys,hrs,mns,scs;
@@ -860,70 +860,70 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
     sprintf(arg2,"%d",sr+j);
     sprintf(arg4,"%d",j+1);
     sprintf(cmdbuf,"\"%s\" %s %s %s %s %s %s",
-	    cmd,nb,arg2,nt,arg4,arg5,subprocess_ind);
+            cmd,nb,arg2,nt,arg4,arg5,subprocess_ind);
     memset(&sinfo,0,sizeof(sinfo));
     memset(&pinfo,0,sizeof(pinfo));
     sinfo.cb = sizeof(sinfo);
     if (CreateProcess(arg0,cmdbuf,NULL,NULL,TRUE,0,NULL,NULL,&sinfo,&pinfo)
-	== FALSE)
+        == FALSE)
       {err = GetLastError();
        sprintf(notes,"err %d trying to create process",err);
        note(1);
        record_note();
        continue;}
     sprintf(notes,"pid = %d 0x%X (subprocess %d)",
-	    pinfo.dwProcessId,pinfo.dwProcessId,j+1);
+            pinfo.dwProcessId,pinfo.dwProcessId,j+1);
     note(3);
     record_note();
     nticks = 0;
     while(1)
       {if (GetExitCodeProcess(pinfo.hProcess,&exit_code) == TRUE)
-	 {if (exit_code == STILL_ACTIVE)
-	    {if (nticks == maxticks)
-	       {sprintf(notes,"time limit reached on pid %d 0x%X. using kill.",
-			pinfo.dwProcessId,pinfo.dwProcessId);
-		note(3);
-		record_note();
-		if (TerminateProcess(pinfo.hProcess,
-				     APPLICATION_ERROR_MASK |
-				     ERROR_SEVERITY_ERROR |
-				     1) == FALSE)
-		  {err = GetLastError();
-		   sprintf(notes,"err %d trying to terminate process.",err);
-		   note(3);
-		   record_note();
-		   chk_CloseHandle(pinfo.hProcess);
-		   chk_CloseHandle(pinfo.hThread);
-		   break;}
-		++nticks;}
-	    else
-	      {++nticks;
-	       Sleep(100);}}
-	 else
-	   {sprintf(notes,"pid %d 0x%X exited with status %d",
-		    pinfo.dwProcessId,pinfo.dwProcessId,exit_code);
-	    note(3);
-	    record_status(exit_code);
-	    chk_CloseHandle(pinfo.hProcess);
-	    chk_CloseHandle(pinfo.hThread);
-	    record_note();
-	    break;}}
+         {if (exit_code == STILL_ACTIVE)
+            {if (nticks == maxticks)
+               {sprintf(notes,"time limit reached on pid %d 0x%X. using kill.",
+                        pinfo.dwProcessId,pinfo.dwProcessId);
+                note(3);
+                record_note();
+                if (TerminateProcess(pinfo.hProcess,
+                                     APPLICATION_ERROR_MASK |
+                                     ERROR_SEVERITY_ERROR |
+                                     1) == FALSE)
+                  {err = GetLastError();
+                   sprintf(notes,"err %d trying to terminate process.",err);
+                   note(3);
+                   record_note();
+                   chk_CloseHandle(pinfo.hProcess);
+                   chk_CloseHandle(pinfo.hThread);
+                   break;}
+                ++nticks;}
+            else
+              {++nticks;
+               Sleep(100);}}
+         else
+           {sprintf(notes,"pid %d 0x%X exited with status %d",
+                    pinfo.dwProcessId,pinfo.dwProcessId,exit_code);
+            note(3);
+            record_status(exit_code);
+            chk_CloseHandle(pinfo.hProcess);
+            chk_CloseHandle(pinfo.hThread);
+            record_note();
+            break;}}
       else
-	{err = GetLastError();
-	 sprintf(notes,"err %d on GetExitCodeProcess.");
-	 note(3);
-	 chk_CloseHandle(pinfo.hProcess);
-	 chk_CloseHandle(pinfo.hThread);
-	 record_note();
-	 break;}}
+        {err = GetLastError();
+         sprintf(notes,"err %d on GetExitCodeProcess.");
+         note(3);
+         chk_CloseHandle(pinfo.hProcess);
+         chk_CloseHandle(pinfo.hThread);
+         record_note();
+         break;}}
     if (tflag == 1)
       {time(&after_time);
        total_time = (long) (after_time - before_time);
        if (total_time >= nsubs)
-	 {sprintf(notes,"Time limit reached after run %d",j+1);
-	  note(2);
-	  record_note();
-	  break;}}}
+         {sprintf(notes,"Time limit reached after run %d",j+1);
+          note(2);
+          record_note();
+          break;}}}
  time(&after_time);
  total_time = (long) (after_time - before_time);
  scs = total_time;
@@ -934,10 +934,9 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
  mns = mns % 60;
  hrs = hrs % 24;
  sprintf(notes,
-	 "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
-	 total_time,dys,hrs,mns,scs);
+         "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
+         total_time,dys,hrs,mns,scs);
  note(1);
  summarize_status();}
 
 #endif
-

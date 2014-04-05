@@ -1,4 +1,4 @@
-.TH CRASHME 1C LOCAL 
+.TH CRASHME 1
 .SH NAME
 crashme \- test operating environment software robustness
 .SH SYNOPSIS
@@ -88,5 +88,6 @@ operating system or hardware of same is buggy. User data may be lost.
 .SH AUTHOR
 George J Carrette. GJC\@alum.mit.edu
 http://people.delphiforums.com/gjc/crashme.html
+http://crashme.codeplex.com/
 .SH VERSION
-2.4 20-MAY-1994
+2.7 4-APR-2014
