@@ -172,11 +172,22 @@ report-crash-start:
 ### These commands work in some linux environments.
 
 APPORT_INIT=/etc/init.d/apport
+CORE_PATTERN_API=/proc/sys/kernel/core_pattern
+CORE_PATTERN=core-%p-%u-%g-%s-%t-%h-%e
 
 apport-crash-stop:
 	sudo $(APPORT_INIT) stop
-	cat /proc/sys/kernel/core_pattern
+	cat $(CORE_PATTERN_API)
 
 apport-crash-start:
 	sudo $(APPORT_INIT) start
-	cat /proc/sys/kernel/core_pattern
+	cat $(CORE_PATTERN_API)
+
+set-core-pattern:
+	sudo sh -c 'echo $(CORE_PATTERN) > $(CORE_PATTERN_API)'
+	cat $(CORE_PATTERN_API)
+
+show-core-limit:
+	bash -c "ulimit -a"
+
+
