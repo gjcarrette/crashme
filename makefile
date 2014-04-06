@@ -37,7 +37,8 @@ crashme.txt: crashme.man
 
 DIST_FILES = crashme.man crashme.c crashme.html \
              crashme.vms-opt descrip.mms makefile \
-             pddet.c crashme.txt
+             pddet.c crashme.txt mt19937ar.h vnsq.h \
+             vnsq.c mt19937ar.c
 
 # These files were in the distribution. 
 # but they got lost and it isn't clear
@@ -62,6 +63,12 @@ CRASHME_I386=release/crashme.exe release/pddet.exe
 crashme_i386.zip: $(DIST_FILES) $(CRASHME_I386)
 	zip -D -j crashme_i386.zip $(DIST_FILES) $(CRASHME_I386)
 
+test-dist: crashme.tgz
+	(rm -rf test-dist-tgz;\
+         mkdir test-dist-tgz;\
+         cd test-dist-tgz;\
+         tar xvfz ../crashme.tgz;\
+         make all dist ptest1)
 
 ####
 
