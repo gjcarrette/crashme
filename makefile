@@ -162,3 +162,21 @@ report-crash-start:
 	-launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 	-sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 
+### Just like in Apple Mac environment you need to turn off crash
+### reporting to prevent large amounts of system resources from being
+### consumed in the crash reporting.  One could consider
+### configurations of ~/.apport-ignore.xml and /etc/apport 
+### But still that leaves /proc/sys/kernel/core_pattern
+### set up to flood a process with core dumps.
+
+### These commands work in some linux environments.
+
+APPORT_INIT=/etc/init.d/apport
+
+apport-crash-stop:
+	sudo $(APPORT_INIT) stop
+	cat /proc/sys/kernel/core_pattern
+
+apport-crash-start:
+	sudo $(APPORT_INIT) start
+	cat /proc/sys/kernel/core_pattern
