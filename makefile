@@ -2,6 +2,7 @@
 # unix makefile for crashme program.
 
 CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
+DIST_VERSION=2.7
 
 all: crashme pddet
 
@@ -27,7 +28,7 @@ showdefs:
 clean:
 	-rm crashme pddet *.o core crashme.zip \
             crashme.tgz crashme_i386.zip *.plg *.ncb *.opt
-	-rm -rf release debug
+	-rm -rf release debug test-dist-tgz siod-$(DIST_VERSION)
 
 # create for dist for people without nroff
 
@@ -59,6 +60,14 @@ check:
 
 dist: crashme.zip crashme.tgz 
 
+dist-version: siod-$(DIST_VERSION).tgz
+
+siod-$(DIST_VERSION).tgz: $(DIST_FILES)
+	rm -rf siod-$(DIST_VERSION)
+	mkdir siod-$(DIST_VERSION)
+	cp -a $(DIST_FILES) siod-$(DIST_VERSION)
+	tar cvfz siod-$(DIST_VERSION).tgz siod-$(DIST_VERSION)
+
 #crashme_i386.zip
 
 CRASHME_I386=release/crashme.exe release/pddet.exe
@@ -71,7 +80,11 @@ test-dist: crashme.tgz
          mkdir test-dist-tgz;\
          cd test-dist-tgz;\
          tar xvfz ../crashme.tgz;\
-         make all dist ptest1)
+         make all dist ptest1 ptest7)
+
+test-dist-version: dist-version
+	(cd siod-$(DIST_VERSION);\
+         make all dist ptest1 ptest7)
 
 ####
 
