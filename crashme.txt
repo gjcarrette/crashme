@@ -23,7 +23,7 @@ DESCRIPTION
                are  printed  instead  of  being  executed.  If  given  with an
                explicit plus sign then the storage for the  bytes  is  freshly
                malloc'ed  each  time. This can have an effect on machines with
-               seperate I and D cache mechanisms. The argument can also have a
+               separate I and D cache mechanisms. The argument can also have a
                dot  in  it,  X.Y, in which case Y is a increment for a pointer
                into the random data. The buffer is recalculated only when  the
                pointer gets near the end of the data.
@@ -74,8 +74,8 @@ DIAGNOSTICS
 
 BUGS
        Not all signals are caught, and the state of the  user  program/process
-       enviroment can be sufficiently damaged such that the program terminates
-       before going through all [NTRIES] operations.
+       environment  can  be  sufficiently damaged such that the program termi‐
+       nates before going through all [NTRIES] operations.
 
        If the architecture uses some kind of procedure descriptor but no  spe‐
        cial  code  has been not been added to castaway() in crashme.c then the
