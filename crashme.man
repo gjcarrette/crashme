@@ -22,7 +22,7 @@ should be an integer, specifying the size of the random data string
 in bytes. If given negative then the bytes are printed instead of
 being executed. If given with an explicit plus sign then the
 storage for the bytes is freshly malloc'ed each time. This can have an
-effect on machines with seperate I and D cache mechanisms. The argument
+effect on machines with separate I and D cache mechanisms. The argument
 can also have a dot in it, X.Y, in which case Y is a increment for
 a pointer into the random data. The buffer is recalculated only when
 the pointer gets near the end of the data.
@@ -76,7 +76,7 @@ Setting the environment variable CRASHLOG will cause each subprocess to
 record the arguments it was given.
 .SH BUGS
 Not all signals are caught, and the state of the user program/process
-enviroment can be sufficiently damaged such that the program terminates
+environment can be sufficiently damaged such that the program terminates
 before going through all [NTRIES] operations.
 
 If the architecture uses some kind of procedure descriptor but no

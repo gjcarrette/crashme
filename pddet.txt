@@ -1,0 +1,25 @@
+PDDET(1)                    General Commands Manual                   PDDET(1)
+
+
+
+NAME
+       pddet - survey of procedure and descriptor usage
+
+DESCRIPTION
+       pddet  Survey  of  Procedure  Descriptor Usage. The emphasis here is on
+       currently shipping  products.  The  program  pddet  included  with  the
+       crashme distribution can be used to determine some of this information.
+       Note that in some environments, e.g. Microsoft C++ 4.0 the  results  of
+       pddet  will  be  different  depending  on the compilation modes chosen:
+       debug versus release.
+
+AUTHOR
+       George    J    Carrette.    GJC@alum.mit.edu    http://people.delphifo‐
+       rums.com/gjc/crashme.html http://crashme.codeplex.com/
+
+VERSION
+       2.7 4-APR-2014
+
+
+
+                                                                      PDDET(1)

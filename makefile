@@ -1,19 +1,19 @@
 
 # unix makefile for crashme program.
 
-CFLAGS=-DPRNG_MT
+CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
 
 all: crashme pddet
 
 # make "CFLAGS=-Wall -DPRNG_MT -g"xo CC=gcc
 
 crashme: crashme.o vnsq.o mt19937ar.o
-	$(CC) -o crashme crashme.o vnsq.o mt19937ar.o
+	$(CC) $(CCFLAGS) -o crashme crashme.o vnsq.o mt19937ar.o
 
 crashme.o: crashme.c
 
 pddet:	pddet.o
-	$(CC) -o pddet pddet.o
+	$(CC) $(CCFLAGS) -o pddet pddet.o
 
 pddet.o: pddet.c
 
@@ -34,11 +34,14 @@ clean:
 crashme.txt: crashme.man
 	nroff -man crashme.man | col -bx > crashme.txt
 
+pddet.txt: pddet.man
+	nroff -man pddet.man | col -bx > pddet.txt
+
 
 DIST_FILES = crashme.man crashme.c crashme.html \
              crashme.vms-opt descrip.mms makefile \
              pddet.c crashme.txt mt19937ar.h vnsq.h \
-             vnsq.c mt19937ar.c
+             vnsq.c mt19937ar.c pddet.man pddet.txt
 
 # These files were in the distribution. 
 # but they got lost and it isn't clear
