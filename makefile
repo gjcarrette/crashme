@@ -56,7 +56,11 @@ crashme.tgz: $(DIST_FILES)
 	tar cvf - $(DIST_FILES) | gzip -v > crashme.tgz
 
 check:
-	nsgmls -s crashme.html
+	#nsgmls -s crashme.html
+	xmllint --noout crashme.html
+	xmllint --noout downloads.html
+
+
 
 dist: crashme.zip crashme.tgz 
 
