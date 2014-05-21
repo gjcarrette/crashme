@@ -1,0 +1,17 @@
+.TH PDDET 1
+.SH NAME
+pddet \- survey of procedure and descriptor usage
+.SH DESCRIPTION
+.I pddet
+Survey of Procedure Descriptor Usage. The emphasis here is on
+currently shipping products. The program pddet included
+with the crashme distribution can be used to determine some of this
+information. Note that in some environments, e.g. Microsoft C++ 4.0
+the results of pddet will be different depending on the compilation
+modes chosen: debug versus release.
+.SH AUTHOR
+George J Carrette. GJC\@alum.mit.edu
+http://people.delphiforums.com/gjc/crashme.html
+http://crashme.codeplex.com/
+.SH VERSION
+2.7 4-APR-2014
