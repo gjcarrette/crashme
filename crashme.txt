@@ -28,33 +28,40 @@ DESCRIPTION
                into the random data. The buffer is recalculated only when  the
                pointer gets near the end of the data.
 
+               The are two magic values for [NBYTES] : A value of 81920 avoids
+               malloc and returns a pointer to static  data.  This  makes  the
+               operation  of  crashme  more  repeatable on architectures where
+               malloc is designed to return unpredictable locations.  A  value
+               of  1025  avoids a call that sets the protection of the data to
+               READ+WRITE+EXEC.
 
-       [SRAND] The  [SRAND]  is  an input seed to the random number generator,
+
+       [SRAND] The [SRAND] is an input seed to the  random  number  generator,
                passed to srand.
 
        [NTRIES]
-               The [NTRIES] is how many times to loop before exiting  normally
+               The  [NTRIES] is how many times to loop before exiting normally
                from the program.
 
-       [NSUB]  The  [NSUB]  is optional, the number of vfork subprocesses run‐
-               ning all at once.  If negative run one after another. If  given
-               as  a  time hrs:mns:scs (hours, minutes, seconds) then one sub‐
-               process will be run to completion, followed by  another,  until
-               the  time limit has been reached.  If this argument is given as
+       [NSUB]  The [NSUB] is optional, the number of vfork  subprocesses  run‐
+               ning  all at once.  If negative run one after another. If given
+               as a time hrs:mns:scs (hours, minutes, seconds) then  one  sub‐
+               process  will  be run to completion, followed by another, until
+               the time limit has been reached.  If this argument is given  as
                the empty string or . then it is ignored.
 
-               When in sequential-subprocess mode there is a  30  second  time
+               When  in  sequential-subprocess  mode there is a 30 second time
                limit on each subprocess. This is to allow the instruction-set-
                space random walk to continue when a process bashes itself into
-               an  infinite  loop.   For example, the ntrys can be bashed to a
-               very large number with nbytes bashed to zero. (10 second  limit
+               an infinite loop.  For example, the ntrys can be  bashed  to  a
+               very  large number with nbytes bashed to zero. (10 second limit
                on Windows NT).
 
                The SRAND argument is incremented by one for each subprocess.
 
 
        [VERBOSE]
-               The  [VERBOSE]  arg  is optional. 0 is the least verbose, 5 the
+               The [VERBOSE] arg is optional. 0 is the least  verbose,  5  the
                most.
 
 
@@ -68,17 +75,17 @@ FILES
        crashme.c
 
 DIAGNOSTICS
-       When a signal is caught the number and nature of the  signal  is  indi‐
-       cated.   Setting the environment variable CRASHLOG will cause each sub‐
+       When  a  signal  is caught the number and nature of the signal is indi‐
+       cated.  Setting the environment variable CRASHLOG will cause each  sub‐
        process to record the arguments it was given.
 
 BUGS
-       Not all signals are caught, and the state of the  user  program/process
-       environment  can  be  sufficiently damaged such that the program termi‐
+       Not  all  signals are caught, and the state of the user program/process
+       environment can be sufficiently damaged such that  the  program  termi‐
        nates before going through all [NTRIES] operations.
 
-       If the architecture uses some kind of procedure descriptor but no  spe‐
-       cial  code  has been not been added to castaway() in crashme.c then the
+       If  the architecture uses some kind of procedure descriptor but no spe‐
+       cial code has been not been added to castaway() in crashme.c  then  the
        stress test will not be as potent as it would otherwise be.
 
        Beware: This program can crash your computer if the operating system or

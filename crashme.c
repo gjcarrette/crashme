@@ -1,7 +1,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.7 4-APR-2014";
+char *crashme_version = "2.8 22-MAY-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -64,6 +64,7 @@ Version Date         Description
  2.5     6-JUL-2008  more WIN32 support
  2.6    12-JUL-2008  use Mersenne twister pseudorandom number generator.
  2.7     4-APR-2014  __APPLE__ port, fix linux 64 bit port.
+ 2.8    22-MAY-2014  Magic NBYTES of 81920 and 1025.
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -268,13 +269,13 @@ void note(long level)
 jmp_buf again_buff;
 #endif
 
-unsigned char *bad_malloc(long n)
-{unsigned char *data;
- data = (unsigned char *) malloc(n);
- if (data == NULL) {
-   perror("malloc");
-   return(NULL);
- }
+#define MAGIC_NBYTES_STATIC 81920
+#define MAGIC_NBYTES_NOEXEC 1025
+
+unsigned char static_data[MAGIC_NBYTES_STATIC];
+
+void set_exec_prot(unsigned char *data, long n)
+{
 #ifdef pyr
  if (mprotect(((int)data/PAGSIZ)*PAGSIZ, (n/PAGSIZ+1)*PAGSIZ,
               PROT_READ|PROT_WRITE|PROT_EXEC))
@@ -292,7 +293,24 @@ unsigned char *bad_malloc(long n)
               PROT_READ|PROT_WRITE|PROT_EXEC))
    perror("mprotect");
 #endif
-  return(data);}
+}
+
+unsigned char *bad_malloc(long n)
+{unsigned char *data;
+  if ((malloc_flag == 0) && (n == sizeof(static_data))) {
+    data = &static_data[0];
+  } else {
+    data = (unsigned char *) malloc(n);
+  }
+ if (data == NULL) {
+   perror("malloc");
+   return(NULL);
+ }
+ if (n != MAGIC_NBYTES_NOEXEC) {
+   set_exec_prot(data, n);
+ }
+ return(data);
+}
 
 #ifndef WIN32
 
