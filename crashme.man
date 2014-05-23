@@ -27,6 +27,15 @@ can also have a dot in it, X.Y, in which case Y is a increment for
 a pointer into the random data. The buffer is recalculated only when
 the pointer gets near the end of the data.
 
+The are two magic values for
+.I [NBYTES]
+:
+A value of 81920 avoids malloc and returns a pointer to
+static data. This makes the operation of crashme more
+repeatable on architectures where malloc is designed to
+return unpredictable locations. A value of 1025 avoids a call
+that sets the protection of the data to READ+WRITE+EXEC.
+
 .TP
 .BI [SRAND]
 The 
@@ -90,4 +99,4 @@ George J Carrette. GJC\@alum.mit.edu
 http://people.delphiforums.com/gjc/crashme.html
 http://crashme.codeplex.com/
 .SH VERSION
-2.7 4-APR-2014
+2.8 22-MAY-2014
