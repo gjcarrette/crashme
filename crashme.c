@@ -1,7 +1,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.8 22-MAY-2014";
+char *crashme_version = "2.8.1 27-MAY-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -65,6 +65,7 @@ Version Date         Description
  2.6    12-JUL-2008  use Mersenne twister pseudorandom number generator.
  2.7     4-APR-2014  __APPLE__ port, fix linux 64 bit port.
  2.8    22-MAY-2014  Magic NBYTES of 81920 and 1025.
+ 2.8.1  27-MAY-2014  Debian patch to use execlp instead of execl
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -773,7 +774,7 @@ void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
     pstatus = fork();
 #endif
     if (pstatus == 0)
-      {status = execl(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,NULL);
+      {status = execlp(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,NULL);
        if (status == -1)
          {perror(cmd);
           exit(1);}}

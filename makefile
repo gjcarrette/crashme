@@ -2,7 +2,7 @@
 # unix makefile for crashme program.
 
 CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
-DIST_VERSION=2.8
+DIST_VERSION=2.8.1
 
 all: crashme pddet
 
@@ -12,15 +12,19 @@ crashme: crashme.o vnsq.o mt19937ar.o
 	$(CC) $(CCFLAGS) -o crashme crashme.o vnsq.o mt19937ar.o
 
 crashme.o: crashme.c
+	$(CC) $(CCFLAGS) -c crashme.c
 
 pddet:	pddet.o
 	$(CC) $(CCFLAGS) -o pddet pddet.o
 
 pddet.o: pddet.c
+	$(CC) $(CCFLAGS) -c pddet.c
 
 vnsq.o: vnsq.c
+	$(CC) $(CCFLAGS) -c vnsq.c
 
 mt19937ar.o: mt19937ar.c
+	$(CC) $(CCFLAGS) -c mt19937ar.c
 
 showdefs:
 	$(CC) -dM -E - < /dev/null
