@@ -1,7 +1,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.8.1 27-MAY-2014";
+char *crashme_version = "2.8.2 29-MAY-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -66,6 +66,7 @@ Version Date         Description
  2.7     4-APR-2014  __APPLE__ port, fix linux 64 bit port.
  2.8    22-MAY-2014  Magic NBYTES of 81920 and 1025.
  2.8.1  27-MAY-2014  Debian patch to use execlp instead of execl
+ 2.8.2  29-MAY-2014  fix bug in call to memset.
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -349,7 +350,7 @@ void my_signal(int sig,void (*func)())
 #else
  struct sigaction act;
  act.sa_handler = func;
- memset(&act.sa_mask, sizeof(act.sa_mask), 0);
+ memset(&act.sa_mask, 0, sizeof(act.sa_mask));
 #ifdef linux
  act.sa_restorer = 0;
 #endif /* linux */
