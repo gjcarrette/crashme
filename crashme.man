@@ -71,6 +71,28 @@ The
 .I [VERBOSE] 
 arg is optional. 0 is the least verbose, 5 the most.
 
+.SS ENVIRONMENT VARIABLES
+.TP 8
+.BI CRASHLOG
+The
+.I CRASHLOG
+is the name of the file which the parent process opens in write mode
+and all child processes open in append mode. There is frequent flushing
+of the file but no locking, so the output may be interleaved. If the
+operating system crashes then this file might provide a short-cut
+to a more resent random number seed sequence to allow for quicker
+finding of the special case that caused the crash.
+
+.TP
+.BI CRASHPRNG
+The
+.I CRASHPRNG
+can be set to RAND to use the system-provided rand function, or MT
+to use the Mersenne twister (default) as coded by
+Takuji Nishimura and Makoto Matsumoto, or VNSQ to use the author's
+kludge interpretation of Von Neumann's middle-square method.
+
+
 .SH EXAMPLE
 This is a suggested test, to run it for a least an hour.
 
@@ -99,4 +121,4 @@ George J Carrette. GJC\@alum.mit.edu
 http://people.delphiforums.com/gjc/crashme.html
 http://crashme.codeplex.com/
 .SH VERSION
-2.8 22-MAY-2014
+2.8.2 29-MAY-2014

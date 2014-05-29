@@ -2,7 +2,7 @@
 # unix makefile for crashme program.
 
 CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
-DIST_VERSION=2.8.1
+DIST_VERSION=2.8.2
 
 all: crashme pddet
 
@@ -64,7 +64,10 @@ check:
 	xmllint --noout crashme.html
 	xmllint --noout downloads.html
 
+TAGS_SRC=$(DIST_FILES) downloads.html
 
+TAGS:	$(TAGS_SRC)
+	etags $(TAGS_SRC)
 
 dist: crashme.zip crashme.tgz 
 
@@ -214,4 +217,13 @@ set-core-pattern:
 show-core-limit:
 	bash -c "ulimit -a"
 
+#
+ps:
+	-ps -C crashme -f -H
+
+pgrep:
+	-pgrep -l crashme
+
+pkill:
+	-pkill crashme
 
