@@ -18,7 +18,7 @@ AUTHOR
        rums.com/gjc/crashme.html http://crashme.codeplex.com/
 
 VERSION
-       2.7 4-APR-2014
+       2.8.3 2-JUN-2014
 
 
 
