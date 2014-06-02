@@ -2,7 +2,7 @@
 # unix makefile for crashme program.
 
 CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
-DIST_VERSION=2.8.2
+DIST_VERSION=2.8.3
 
 all: crashme pddet
 
@@ -177,9 +177,17 @@ test1cb:
 test1cc:
 	sh -c "CRASHPRNG=VNSQ;export CRASHPRNG;CRASHLOG=$(LOG_DIR)/crashme-test1-vnsq.log;export CRASHLOG;./crashme 8192 666 100 00:00:30 3"
 
+test-mt19937ar: mt19937ar_main
+	./mt19937ar_main
 
-# Use this to disable all crash report generation for the current user.
+mt19937ar_main: mt19937ar.c
+	$(CC) $(CCFLAGS) -DMT19937AR_MAIN -o mt19937ar_main mt19937ar.c
 
+
+### Use these targets to disable all crash report generation,
+### otherwise large amounts of system resources could be consumed.
+
+### These targets are for Apple Mac.
 
 report-crash-stop:
 	-launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -189,14 +197,11 @@ report-crash-start:
 	-launchctl load -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
 	-sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist
 
-### Just like in Apple Mac environment you need to turn off crash
-### reporting to prevent large amounts of system resources from being
-### consumed in the crash reporting.  One could consider
-### configurations of ~/.apport-ignore.xml and /etc/apport 
-### But still that leaves /proc/sys/kernel/core_pattern
-### set up to flood a process with core dumps.
-
 ### These commands work in some linux environments.
+### An alternative would configuration of ~/.apport-ignore.xml or /etc/apport
+### to tell apport to ignore crashme. But that still that leaves 
+### /proc/sys/kernel/core_pattern
+### sending a large number of crash dumps to apport.
 
 APPORT_INIT=/etc/init.d/apport
 CORE_PATTERN_API=/proc/sys/kernel/core_pattern

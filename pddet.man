@@ -14,4 +14,4 @@ George J Carrette. GJC\@alum.mit.edu
 http://people.delphiforums.com/gjc/crashme.html
 http://crashme.codeplex.com/
 .SH VERSION
-2.7 4-APR-2014
+2.8.3 2-JUN-2014

@@ -1,7 +1,8 @@
+/* -*- Mode: C; indent-tabs-mode: nil -*- */
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.8.2 29-MAY-2014";
+char *crashme_version = "2.8.3 2-JUN-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -67,6 +68,7 @@ Version Date         Description
  2.8    22-MAY-2014  Magic NBYTES of 81920 and 1025.
  2.8.1  27-MAY-2014  Debian patch to use execlp instead of execl
  2.8.2  29-MAY-2014  fix bug in call to memset.
+ 2.8.3   2-JUN-2014  gnu indent
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -169,7 +171,7 @@ a script.
 #define _strdup strdup
 #endif
 
-void prng_setup(long nseed);
+void prng_setup (long nseed);
 
 #define PRNG_TYPE_RAND 1
 #define PRNG_TYPE_MT 2
@@ -186,11 +188,11 @@ int prng_type;
 
 #include "vnsq.h"
 
-typedef void (*BADBOY)();
+typedef void (*BADBOY) ();
 
 BADBOY badboy;
 
-long nbytes,nseed,ntrys;
+long nbytes, nseed, ntrys;
 long incptr = 0;
 long offset = 0;
 long next_offset = 0;
@@ -201,11 +203,13 @@ char *note_buffer;
 char *notes;
 
 long verbose_level = 5;
+long child_kill_count = 0;
 
-void old_main(int argc,char **argv);
-void copyright_note(long n);
-void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt);
-void badboy_loop(void);
+void old_main (int argc, char **argv);
+void copyright_note (long n);
+void vfork_main (long tflag, long nsubs, char *cmd, char *nb, long sr,
+                 char *nt);
+void badboy_loop (void);
 
 
 char *subprocess_ind = "subprocess";
@@ -222,49 +226,62 @@ char *logfilename = NULL;
 
 int note_count = 0;
 
-void record_note(void)
+void
+record_note (void)
 {
   if (logfile && (note_count > 0))
     {
-      fflush(logfile);
+      fflush (logfile);
       if ((subprocess_flag == 0) && (vfork_flag == 1))
         {
           /* we have children. Closing and opening the file will provide a bit
              better output, avoiding the mixup, and without the complexity of
              a lock. */
-          fclose(logfile);
-          logfile = fopen(logfilename,"a");
+          fclose (logfile);
+          logfile = fopen (logfilename, "a");
         }
     }
   note_count = 0;
 }
 
-void open_record(void)
-{char *tmp;
- if ((!(tmp = getenv("CRASHLOG"))) ||
-     (strcmp(tmp,"") == 0))
-   return;
- logfilename = _strdup(tmp);
- if (!(logfile = fopen(logfilename,(subprocess_flag) ? "a" : "w")))
-   {perror(logfilename);
-    return;}}
+void
+open_record (void)
+{
+  char *tmp;
+  if ((!(tmp = getenv ("CRASHLOG"))) || (strcmp (tmp, "") == 0))
+    return;
+  logfilename = _strdup (tmp);
+  if (!(logfile = fopen (logfilename, (subprocess_flag) ? "a" : "w")))
+    {
+      perror (logfilename);
+      return;
+    }
+}
 
-void close_record(void)
-{if (logfile)
-   {fclose(logfile);
-    logfile = NULL;}}
+void
+close_record (void)
+{
+  if (logfile)
+    {
+      fclose (logfile);
+      logfile = NULL;
+    }
+}
 
-void note(long level)
-{if (level > verbose_level) return;
- ++note_count;
- strcat(note_buffer,"\n");
- fputs(note_buffer,stdout);
- fflush(stdout);
- if (logfile)
-   {
-     fputs(note_buffer,logfile);
-     fflush(logfile);
-   }
+void
+note (long level)
+{
+  if (level > verbose_level)
+    return;
+  ++note_count;
+  strcat (note_buffer, "\n");
+  fputs (note_buffer, stdout);
+  fflush (stdout);
+  if (logfile)
+    {
+      fputs (note_buffer, logfile);
+      fflush (logfile);
+    }
 }
 
 #ifndef WIN32
@@ -276,209 +293,279 @@ jmp_buf again_buff;
 
 unsigned char static_data[MAGIC_NBYTES_STATIC];
 
-void set_exec_prot(unsigned char *data, long n)
+void
+set_exec_prot (unsigned char *data, long n)
 {
 #ifdef pyr
- if (mprotect(((int)data/PAGSIZ)*PAGSIZ, (n/PAGSIZ+1)*PAGSIZ,
-              PROT_READ|PROT_WRITE|PROT_EXEC))
-   perror("mprotect");
+  if (mprotect (((int) data / PAGSIZ) * PAGSIZ, (n / PAGSIZ + 1) * PAGSIZ,
+                PROT_READ | PROT_WRITE | PROT_EXEC))
+    perror ("mprotect");
 #endif
 #if defined(__APPLE__) || defined(__FreeBSD__) || defined(linux)
- /* if we don't do this on the 64-bit architectures
-    then all we get out of our badboy() calls
-    is a nice safe "bus error" signal.
- */
- int pagesize;
- pagesize = getpagesize();
- if (mprotect((void *)((((long)data)/pagesize)*pagesize),
-              ((n/pagesize)+1)*pagesize,
-              PROT_READ|PROT_WRITE|PROT_EXEC))
-   perror("mprotect");
+  /* if we don't do this on the 64-bit architectures
+     then all we get out of our badboy() calls
+     is a nice safe "bus error" signal.
+   */
+  int pagesize;
+  pagesize = getpagesize ();
+  if (mprotect ((void *) ((((long) data) / pagesize) * pagesize),
+                ((n / pagesize) + 1) * pagesize,
+                PROT_READ | PROT_WRITE | PROT_EXEC))
+    perror ("mprotect");
 #endif
 }
 
-unsigned char *bad_malloc(long n)
-{unsigned char *data;
-  if ((malloc_flag == 0) && (n == sizeof(static_data))) {
-    data = &static_data[0];
-  } else {
-    data = (unsigned char *) malloc(n);
-  }
- if (data == NULL) {
-   perror("malloc");
-   return(NULL);
- }
- if (n != MAGIC_NBYTES_NOEXEC) {
-   set_exec_prot(data, n);
- }
- return(data);
+unsigned char *
+bad_malloc (long n)
+{
+  unsigned char *data;
+  if ((malloc_flag == 0) && (n == sizeof (static_data)))
+    {
+      data = &static_data[0];
+    }
+  else
+    {
+      data = (unsigned char *) malloc (n);
+    }
+  if (data == NULL)
+    {
+      perror ("malloc");
+      return (NULL);
+    }
+  if (n != MAGIC_NBYTES_NOEXEC)
+    {
+      set_exec_prot (data, n);
+    }
+  return (data);
 }
 
 #ifndef WIN32
 
-void again_handler(int sig)
-{char *ss;
- switch(sig)
-   {case SIGILL: ss =   " illegal instruction"; break;
+void
+again_handler (int sig)
+{
+  char *ss;
+  switch (sig)
+    {
+    case SIGILL:
+      ss = " illegal instruction";
+      break;
 #ifdef SIGTRAP
-    case SIGTRAP: ss =   " trace trap"; break;
+    case SIGTRAP:
+      ss = " trace trap";
+      break;
 #endif
-    case SIGFPE: ss =   " arithmetic exception"; break;
+    case SIGFPE:
+      ss = " arithmetic exception";
+      break;
 #ifdef SIGBUS
-    case SIGBUS: ss =  " bus error"; break;
+    case SIGBUS:
+      ss = " bus error";
+      break;
 #endif
-    case SIGSEGV: ss =  " segmentation violation"; break;
+    case SIGSEGV:
+      ss = " segmentation violation";
+      break;
 #ifdef SIGIOT
-    case SIGIOT: ss = " IOT instruction"; break;
+    case SIGIOT:
+      ss = " IOT instruction";
+      break;
 #endif
 #ifdef SIGEMT
-    case SIGEMT: ss = " EMT instruction"; break;
+    case SIGEMT:
+      ss = " EMT instruction";
+      break;
 #endif
 #ifdef SIGALRM
-    case SIGALRM: ss = " alarm clock"; break;
+    case SIGALRM:
+      ss = " alarm clock";
+      break;
 #endif
-    case SIGINT:  ss = " interrupt"; break;
-    default: ss = "";}
- sprintf(notes,"Got signal %d%s",sig,ss);
- note(5);
- longjmp(again_buff,3);}
+    case SIGINT:
+      ss = " interrupt";
+      break;
+    default:
+      ss = "";
+    }
+  sprintf (notes, "Got signal %d%s", sig, ss);
+  note (5);
+  longjmp (again_buff, 3);
+}
 
-void my_signal(int sig,void (*func)())
+void
+my_signal (int sig, void (*func) ())
 {
 #ifndef SA_ONESHOT
- signal(sig, func);
+  signal (sig, func);
 #else
- struct sigaction act;
- act.sa_handler = func;
- memset(&act.sa_mask, 0, sizeof(act.sa_mask));
+  struct sigaction act;
+  act.sa_handler = func;
+  memset (&act.sa_mask, 0, sizeof (act.sa_mask));
 #ifdef linux
- act.sa_restorer = 0;
+  act.sa_restorer = 0;
 #endif /* linux */
- act.sa_flags = SA_NOMASK;
+  act.sa_flags = SA_NOMASK;
 #ifdef SA_RESTART
- act.sa_flags |= SA_RESTART;
+  act.sa_flags |= SA_RESTART;
 #endif
- sigaction(sig, &act, 0);
+  sigaction (sig, &act, 0);
 #endif /* SA_ONESHOT */
 }
- 
-void set_up_signals(void)
-{my_signal(SIGILL,again_handler);
+
+void
+set_up_signals (void)
+{
+  my_signal (SIGILL, again_handler);
 #ifdef SIGTRAP
- my_signal(SIGTRAP,again_handler);
+  my_signal (SIGTRAP, again_handler);
 #endif
- my_signal(SIGFPE,again_handler);
+  my_signal (SIGFPE, again_handler);
 #ifdef SIGBUS
- my_signal(SIGBUS,again_handler);
+  my_signal (SIGBUS, again_handler);
 #endif
- my_signal(SIGSEGV,again_handler);
+  my_signal (SIGSEGV, again_handler);
 #ifdef SIGIOT
- my_signal(SIGIOT,again_handler);
+  my_signal (SIGIOT, again_handler);
 #endif
 #ifdef SIGEMT
- my_signal(SIGEMT,again_handler);
+  my_signal (SIGEMT, again_handler);
 #endif
 #ifdef SIGALRM
- my_signal(SIGALRM,again_handler);
+  my_signal (SIGALRM, again_handler);
 #endif
- my_signal(SIGINT,again_handler);}
+  my_signal (SIGINT, again_handler);
+}
 
 #endif
 
-void compute_badboy_1(long n)
-{long j;
- if (malloc_flag == 1)
-   the_data = bad_malloc(n);
+void
+compute_badboy_1 (long n)
+{
+  long j;
+  if (malloc_flag == 1)
+    the_data = bad_malloc (n);
 
- switch (prng_type)
+  switch (prng_type)
     {
     case PRNG_TYPE_MT:
 #ifdef PRNG_MT
-      for(j=0;(j+3)<n; j += 4)
+      for (j = 0; (j + 3) < n; j += 4)
         {
-          unsigned long u = genrand_int32();
-          the_data[j+0] = (u >> 24) & 0xFF;
-          the_data[j+1] = (u >> 16) & 0xFF;
-          the_data[j+2] = (u >> 8) & 0xFF;
-          the_data[j+3] = (u >> 0) & 0xFF;
+          unsigned long u = genrand_int32 ();
+          the_data[j + 0] = (u >> 24) & 0xFF;
+          the_data[j + 1] = (u >> 16) & 0xFF;
+          the_data[j + 2] = (u >> 8) & 0xFF;
+          the_data[j + 3] = (u >> 0) & 0xFF;
         }
 #endif
       break;
     case PRNG_TYPE_RAND:
-      for(j=0;j<n;++j) the_data[j] = (rand() >> 7) & 0xFF;
+      for (j = 0; j < n; ++j)
+        the_data[j] = (rand () >> 7) & 0xFF;
       break;
     case PRNG_TYPE_VNSQ:
-      for(j=0;(j+1)<n; j += 2)
+      for (j = 0; (j + 1) < n; j += 2)
         {
-          unsigned long u1 = vnsq_int32();
-          the_data[j+0] = (u1 >> 1) & 0xFF;
-          the_data[j+1] = (u1 >> 9) & 0xFF;
+          unsigned long u1 = vnsq_int32 ();
+          the_data[j + 0] = (u1 >> 1) & 0xFF;
+          the_data[j + 1] = (u1 >> 9) & 0xFF;
         }
       break;
     default:
       break;
     }
 
- if (nbytes < 0)
-   {sprintf(notes,"Dump of %ld bytes of data",n);
-    note(1);
-    for(j=0;j<n;++j)
-      {fprintf(stdout,"%3d",the_data[j]);
-       if ((j % 20) == 19) putc('\n',stdout); else putc(' ',stdout);}
-    putc('\n',stdout);}}
+  if (nbytes < 0)
+    {
+      sprintf (notes, "Dump of %ld bytes of data", n);
+      note (1);
+      for (j = 0; j < n; ++j)
+        {
+          fprintf (stdout, "%3d", the_data[j]);
+          if ((j % 20) == 19)
+            putc ('\n', stdout);
+          else
+            putc (' ', stdout);
+        }
+      putc ('\n', stdout);
+    }
+}
 
-void proto_badboy(void)
-{printf("Hello world.\n");}
+void
+proto_badboy (void)
+{
+  printf ("Hello world.\n");
+}
 
 #if defined(__ALPHA) && defined(VMS) && !defined(NOCASTAWAY)
 #include <pdscdef.h>
 #endif
 
-BADBOY castaway(unsigned char *dat)
+BADBOY
+castaway (unsigned char *dat)
 {
 #if defined(VAX) && !defined(NOCASTAWAY)
   /* register save mask avoids bashing our callers locals */
-  ((unsigned short *)dat)[0] = 0x0FFC;
+  ((unsigned short *) dat)[0] = 0x0FFC;
 #endif
 #if defined(__ALPHA) && defined(VMS) && !defined(NOCASTAWAY)
-  struct pdscdef *p,*b;
+  struct pdscdef *p, *b;
   p = (struct pdscdef *) proto_badboy;
   b = (struct pdscdef *) dat;
-  memcpy(b,p,sizeof(struct pdscdef));
+  memcpy (b, p, sizeof (struct pdscdef));
   b->pdsc$q_entry[1] = 0;
-  b->pdsc$q_entry[0] = (int)&dat[sizeof(struct pdscdef)];
+  b->pdsc$q_entry[0] = (int) &dat[sizeof (struct pdscdef)];
 #endif
 #if (defined(_IBMR2) || defined(_POWER)) && !defined(NOCASTAWAY)
-  struct fdesc {void *fcn_addr; void *toc; void *linkage;} *p,*b;
+  struct fdesc
+  {
+    void *fcn_addr;
+    void *toc;
+    void *linkage;
+  } *p, *b;
   p = (struct fdesc *) proto_badboy;
   b = (struct fdesc *) dat;
-  memcpy(b,p,sizeof(struct fdesc));
-  b->fcn_addr = (void *) &dat[sizeof(struct fdesc)];
+  memcpy (b, p, sizeof (struct fdesc));
+  b->fcn_addr = (void *) &dat[sizeof (struct fdesc)];
 #endif
 #if defined(__hpux) && defined(__hppa) && !defined(NOCASTAWAY)
-  struct fdesc {void *fcn_addr; void *toc;} *p,*b;
+  struct fdesc
+  {
+    void *fcn_addr;
+    void *toc;
+  } *p, *b;
   p = (struct fdesc *) proto_badboy;
   b = (struct fdesc *) dat;
-  memcpy(b,p,sizeof(struct fdesc));
-  b->fcn_addr = (void *) &dat[sizeof(struct fdesc)];
+  memcpy (b, p, sizeof (struct fdesc));
+  b->fcn_addr = (void *) &dat[sizeof (struct fdesc)];
 #endif
-  return((BADBOY)dat);}
+  return ((BADBOY) dat);
+}
 
-void compute_badboy(void)
-{long n;
- n = (nbytes < 0) ? - nbytes : nbytes;
- if (incptr == 0)
-   {compute_badboy_1(n);
-    badboy = castaway(the_data);}
- else if ((next_offset == 0) || (next_offset > ((n * 90) / 100)))
-   {compute_badboy_1(n);
-    offset = 0;
-    next_offset = offset + incptr;
-    badboy = castaway(the_data);}
- else
-   {offset = next_offset;
-    next_offset = offset + incptr;
-    badboy = castaway(&the_data[offset]);}}
+void
+compute_badboy (void)
+{
+  long n;
+  n = (nbytes < 0) ? -nbytes : nbytes;
+  if (incptr == 0)
+    {
+      compute_badboy_1 (n);
+      badboy = castaway (the_data);
+    }
+  else if ((next_offset == 0) || (next_offset > ((n * 90) / 100)))
+    {
+      compute_badboy_1 (n);
+      offset = 0;
+      next_offset = offset + incptr;
+      badboy = castaway (the_data);
+    }
+  else
+    {
+      offset = next_offset;
+      next_offset = offset + incptr;
+      badboy = castaway (&the_data[offset]);
+    }
+}
 
 /* maybe add this code before invoking badboy. But it didn't seem
    to be needed when using +1000.
@@ -486,107 +573,130 @@ void compute_badboy(void)
                          the_data,(nbytes < 0) ? - nbytes : nbytes);
 */
 
-void try_one_crash(void)
-{if (nbytes > 0)
-   (*badboy)();
- else if (nbytes == 0)
-   while(1);}
-
-int main(int argc, char **argv)
-{long nsubs,hrs,mns,scs,tflag,j,m;
- note_buffer = (char *) malloc(NOTE_BUFFER_LEN);
- notes = note_buffer;
- if ((argc == 7) &&
-     (strcmp(argv[6],subprocess_ind) == 0))
-   {sprintf(note_buffer,"Subprocess %s: ",argv[4]);
-    subprocess_flag = 1;
-    notes = note_buffer + strlen(note_buffer);
-    verbose_level = atol(argv[5]);
-    sprintf(notes,"starting");
-    open_record();
-    note(3);
-    record_note();
-    old_main(4,argv);}
- else if (argc == 4)
-   {
-     open_record();
-     old_main(4,argv);
-   }
- else if ((argc == 6) && ((strlen(argv[4]) == 0) ||
-                          (strcmp(argv[4],".") == 0)))
-   {verbose_level = atol(argv[5]);
-    open_record();
-    old_main(4,argv);}
- else if ((argc == 5) || (argc == 6))
-   {open_record();
-    if (argc == 6)
-      verbose_level = atol(argv[5]);
-    copyright_note(1);
-    if (argc < 7)
-      m = argc;
-    else
-      m = 6;
-    strcpy(notes,"crashme");
-    for(j=1;j<m;++j)
-      {strcat(notes," ");
-       strcat(notes,argv[j]);}
-    note(1);
-    record_note();
-    if (strchr(argv[4],':'))
-      {sscanf(argv[4],"%ld:%ld:%ld",&hrs,&mns,&scs);
-       tflag = 1;
-       nsubs = (((hrs * 60) + mns) * 60) + scs;
-       sprintf(notes,"Subprocess run for %ld seconds (%ld %02ld:%02ld:%02ld)",
-               nsubs, hrs / 24, hrs % 24,mns,scs);}
-    else
-      {tflag = 0;
-       nsubs = atol(argv[4]);
-       sprintf(notes,"Creating %ld crashme subprocesses",nsubs);}
-    note(1);
-    prng_setup(0);
-    record_note();
-    vfork_flag = 1;
-    vfork_main(tflag,nsubs,argv[0],argv[1],atol(argv[2]),argv[3]);}
- else
-   {open_record();
-    sprintf(notes,
-            "crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verbose]");
-    note(0);}
- close_record();
- return(EXIT_SUCCESS);}
-
-void copyright_note1(long n)
+void
+try_one_crash (void)
 {
- sprintf(notes,"Crashme: (c) Copyright 1990-2012 George J. Carrette");
- note(n);
- sprintf(notes,"Version: %s",crashme_version);
- note(n);
- sprintf(notes,"From http://alum.mit.edu/www/gjc/crashme.html");
- note(n);
+  if (nbytes > 0)
+    (*badboy) ();
+  else if (nbytes == 0)
+    while (1);
+}
+
+int
+main (int argc, char **argv)
+{
+  long nsubs, hrs, mns, scs, tflag, j, m;
+  note_buffer = (char *) malloc (NOTE_BUFFER_LEN);
+  notes = note_buffer;
+  if ((argc == 7) && (strcmp (argv[6], subprocess_ind) == 0))
+    {
+      sprintf (note_buffer, "Subprocess %s: ", argv[4]);
+      subprocess_flag = 1;
+      notes = note_buffer + strlen (note_buffer);
+      verbose_level = atol (argv[5]);
+      sprintf (notes, "starting");
+      open_record ();
+      note (3);
+      record_note ();
+      old_main (4, argv);
+    }
+  else if (argc == 4)
+    {
+      open_record ();
+      old_main (4, argv);
+    }
+  else if ((argc == 6) && ((strlen (argv[4]) == 0) ||
+                           (strcmp (argv[4], ".") == 0)))
+    {
+      verbose_level = atol (argv[5]);
+      open_record ();
+      old_main (4, argv);
+    }
+  else if ((argc == 5) || (argc == 6))
+    {
+      open_record ();
+      if (argc == 6)
+        verbose_level = atol (argv[5]);
+      copyright_note (1);
+      if (argc < 7)
+        m = argc;
+      else
+        m = 6;
+      strcpy (notes, "crashme");
+      for (j = 1; j < m; ++j)
+        {
+          strcat (notes, " ");
+          strcat (notes, argv[j]);
+        }
+      note (1);
+      record_note ();
+      if (strchr (argv[4], ':'))
+        {
+          sscanf (argv[4], "%ld:%ld:%ld", &hrs, &mns, &scs);
+          tflag = 1;
+          nsubs = (((hrs * 60) + mns) * 60) + scs;
+          sprintf (notes,
+                   "Subprocess run for %ld seconds (%ld %02ld:%02ld:%02ld)",
+                   nsubs, hrs / 24, hrs % 24, mns, scs);
+        }
+      else
+        {
+          tflag = 0;
+          nsubs = atol (argv[4]);
+          sprintf (notes, "Creating %ld crashme subprocesses", nsubs);
+        }
+      note (1);
+      prng_setup (0);
+      record_note ();
+      vfork_flag = 1;
+      vfork_main (tflag, nsubs, argv[0], argv[1], atol (argv[2]), argv[3]);
+    }
+  else
+    {
+      open_record ();
+      sprintf (notes,
+               "crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verbose]");
+      note (0);
+    }
+  close_record ();
+  return (EXIT_SUCCESS);
+}
+
+void
+copyright_note1 (long n)
+{
+  sprintf (notes, "Crashme: (c) Copyright 1990-2012 George J. Carrette");
+  note (n);
+  sprintf (notes, "Version: %s", crashme_version);
+  note (n);
+  sprintf (notes, "From http://alum.mit.edu/www/gjc/crashme.html");
+  note (n);
 #ifdef PRNG_MT
- sprintf(notes,"With http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html");
- note(n);
+  sprintf (notes,
+           "With http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html");
+  note (n);
 #endif
 }
 
-void copyright_note(long n)
+void
+copyright_note (long n)
 {
   if (subprocess_flag == 0)
-    copyright_note1(n);
+    copyright_note1 (n);
 }
-    
-void prng_setup(long nseed)
+
+void
+prng_setup (long nseed)
 {
-  char *prng_name,*tmp;
+  char *prng_name, *tmp;
   prng_name = "";
-  if ((tmp = getenv("CRASHPRNG")) &&
-      (strcmp(tmp,"") != 0))
+  if ((tmp = getenv ("CRASHPRNG")) && (strcmp (tmp, "") != 0))
     prng_name = tmp;
-  if (strcmp(prng_name,"RAND") == 0)
+  if (strcmp (prng_name, "RAND") == 0)
     prng_type = PRNG_TYPE_RAND;
-  else if (strcmp(prng_name,"MT") == 0)
+  else if (strcmp (prng_name, "MT") == 0)
     prng_type = PRNG_TYPE_MT;
-  else if (strcmp(prng_name,"VNSQ") == 0)
+  else if (strcmp (prng_name, "VNSQ") == 0)
     prng_type = PRNG_TYPE_VNSQ;
   else
     prng_type = PRNG_DEFAULT;
@@ -595,368 +705,497 @@ void prng_setup(long nseed)
     {
     case PRNG_TYPE_MT:
 #ifdef PRNG_MT
-      sprintf(notes,"CRASHPRNG %s %d Mersenne twister.",prng_name,prng_type);
-      init_genrand(nseed);
+      sprintf (notes, "CRASHPRNG %s %d Mersenne twister.", prng_name,
+               prng_type);
+      init_genrand (nseed);
 #endif
       break;
     case PRNG_TYPE_RAND:
-      sprintf(notes,"CRASHPRNG %s %d C runtime library rand.",prng_name,prng_type);
-      srand(nseed);
+      sprintf (notes, "CRASHPRNG %s %d C runtime library rand.", prng_name,
+               prng_type);
+      srand (nseed);
       break;
     case PRNG_TYPE_VNSQ:
-      sprintf(notes,"CRASHPRNG %s %d VN middle square.",prng_name,prng_type);
-      init_vnsq(nseed);
+      sprintf (notes, "CRASHPRNG %s %d VN middle square.", prng_name,
+               prng_type);
+      init_vnsq (nseed);
       break;
     default:
-      sprintf(notes,"CRASHPRNG %s %d UNKNOWN",prng_name,prng_type);
+      sprintf (notes, "CRASHPRNG %s %d UNKNOWN", prng_name, prng_type);
       break;
     }
-  note((subprocess_flag == 0) ? 1 : 3);
-  record_note();
+  note ((subprocess_flag == 0) ? 1 : 3);
+  record_note ();
 }
 
 
-void old_main(int argc,char **argv)
-{char *ptr;
- copyright_note(3);
- nbytes = atol(argv[1]);
- if ((ptr = strchr(argv[1],'.')) != NULL)
-   incptr = atol(&ptr[1]);
- if (argv[1][0] == '+') malloc_flag = 1;
- nseed = atol(argv[2]);
- ntrys = atol(argv[3]);
- sprintf(notes,"crashme %s%ld.%ld %ld %ld",
-         (malloc_flag == 0) ? "" : "+",nbytes,incptr,nseed,ntrys);
- note(3);
- record_note();
- if (malloc_flag == 0)
-   {the_data = bad_malloc((nbytes < 0) ? -nbytes : nbytes);
-    badboy = castaway(the_data);
-    sprintf(notes,"Badboy at %ld. 0x%lX",(long)badboy,(long)badboy);
-    note(3);}
- prng_setup(nseed);
+void
+old_main (int argc, char **argv)
+{
+  char *ptr;
+  copyright_note (3);
+  nbytes = atol (argv[1]);
+  if ((ptr = strchr (argv[1], '.')) != NULL)
+    incptr = atol (&ptr[1]);
+  if (argv[1][0] == '+')
+    malloc_flag = 1;
+  nseed = atol (argv[2]);
+  ntrys = atol (argv[3]);
+  sprintf (notes, "crashme %s%ld.%ld %ld %ld",
+           (malloc_flag == 0) ? "" : "+", nbytes, incptr, nseed, ntrys);
+  note (3);
+  record_note ();
+  if (malloc_flag == 0)
+    {
+      the_data = bad_malloc ((nbytes < 0) ? -nbytes : nbytes);
+      badboy = castaway (the_data);
+      sprintf (notes, "Badboy at %ld. 0x%lX", (long) badboy, (long) badboy);
+      note (3);
+    }
+  prng_setup (nseed);
 #ifdef WIN32
- SetErrorMode(SEM_FAILCRITICALERRORS |
-              SEM_NOGPFAULTERRORBOX |
-              SEM_NOOPENFILEERRORBOX);
+  SetErrorMode (SEM_FAILCRITICALERRORS |
+                SEM_NOGPFAULTERRORBOX | SEM_NOOPENFILEERRORBOX);
 #endif
- badboy_loop();}
+  badboy_loop ();
+}
 
 #ifdef WIN32
-DWORD exception_filter(DWORD value)
-{int sev,cus,res,fac,cod;
- sev = 3 & (value >> 30);
- cus = 1 & (value >> 29);
- res = 1 & (value >> 28);
- fac = 07777 & (value >> 16);
- cod = 0xFFFF & value;
- sprintf(notes,"sev(%d)cus(%d)res(%d)fac(%d)code(%d)",
-         sev,cus,res,fac,cod);
- note(5);
- return(EXCEPTION_EXECUTE_HANDLER);}
+DWORD
+exception_filter (DWORD value)
+{
+  int sev, cus, res, fac, cod;
+  sev = 3 & (value >> 30);
+  cus = 1 & (value >> 29);
+  res = 1 & (value >> 28);
+  fac = 07777 & (value >> 16);
+  cod = 0xFFFF & value;
+  sprintf (notes, "sev(%d)cus(%d)res(%d)fac(%d)code(%d)",
+           sev, cus, res, fac, cod);
+  note (5);
+  return (EXCEPTION_EXECUTE_HANDLER);
+}
 #endif
 
-void badboy_loop(void)
-{int i;
- for(i=0;i<ntrys;++i)
-   {compute_badboy();
-    if (offset)
-      sprintf(notes,"try %d, offset %ld",i,offset);
-    else if (malloc_flag == 1)
-      sprintf(notes,"try %d, Badboy at %ld. 0x%lX",i,(long)badboy,(long)badboy);
-    else
-      sprintf(notes,"try %d",i);
-    note(5);
+void
+badboy_loop (void)
+{
+  int i;
+  for (i = 0; i < ntrys; ++i)
+    {
+      compute_badboy ();
+      if (offset)
+        sprintf (notes, "try %d, offset %ld", i, offset);
+      else if (malloc_flag == 1)
+        sprintf (notes, "try %d, Badboy at %ld. 0x%lX", i, (long) badboy,
+                 (long) badboy);
+      else
+        sprintf (notes, "try %d", i);
+      note (5);
 
 #ifdef WIN32
-    __try {try_one_crash();
-         sprintf(notes,"didn't barf!");
-         note(5);}
-    __except(exception_filter(GetExceptionCode()))
-      {}
+      __try
+      {
+        try_one_crash ();
+        sprintf (notes, "didn't barf!");
+        note (5);
+      }
+      __except (exception_filter (GetExceptionCode ()))
+      {
+      }
 #else
-    if (setjmp(again_buff) == 3)
-      {sprintf(notes,"Barfed");
-       note(5);}
-    else
-      {set_up_signals();
-       alarm(10);
-       try_one_crash();
-       sprintf(notes,"didn't barf!");
-       note(5);}
+      if (setjmp (again_buff) == 3)
+        {
+          sprintf (notes, "Barfed");
+          note (5);
+        }
+      else
+        {
+          set_up_signals ();
+          alarm (10);
+          try_one_crash ();
+          sprintf (notes, "didn't barf!");
+          note (5);
+        }
 #endif
-  }}
+    }
+}
 
 struct status_list
-{long status;
- long count;
- struct status_list *next;};
+{
+  long status;
+  long count;
+  struct status_list *next;
+};
 
 struct status_list *slist = NULL;
 
-void record_status(long n)
-{struct status_list *l;
- for(l=slist;l != NULL; l = l->next)
-   if (n == l->status)
-     {
-       ++l->count;
-       return;
-     }
- l = (struct status_list *) malloc(sizeof(struct status_list));
- l->count = 1;
- l->status = n;
- l->next = slist;
- slist = l;}
+void
+record_status (long n)
+{
+  struct status_list *l;
+  for (l = slist; l != NULL; l = l->next)
+    if (n == l->status)
+      {
+        ++l->count;
+        return;
+      }
+  l = (struct status_list *) malloc (sizeof (struct status_list));
+  l->count = 1;
+  l->status = n;
+  l->next = slist;
+  slist = l;
+}
 
-void summarize_status(void)
-{struct status_list *l;
- int n = 0; 
- sprintf(notes,"exit status ... number of cases");
- note(2);
- for(l=slist;l != NULL; l = l->next)
-   {sprintf(notes,"%11ld ... %5ld",(long)l->status,(long)l->count);
-    note(2);
-    ++n;}
- strcpy(notes,"");
- note(2);
- sprintf(notes,"Number of distinct cases = %d",n);
- note(2);}
+void
+summarize_status (void)
+{
+  struct status_list *l;
+  int n = 0;
+  sprintf (notes, "child_kill_count %ld", child_kill_count);
+  note (2);
+  sprintf (notes, "exit status ... number of cases");
+  note (2);
+  for (l = slist; l != NULL; l = l->next)
+    {
+      sprintf (notes, "%11ld ... %5ld", (long) l->status, (long) l->count);
+      note (2);
+      ++n;
+    }
+  strcpy (notes, "");
+  note (2);
+  sprintf (notes, "Number of distinct cases = %d", n);
+  note (2);
+}
 
 #ifndef WIN32
 
 long monitor_pid = 0;
 long monitor_period = 5;
-long monitor_limit =  6; /* 30 second limit on a subprocess */
+long monitor_limit = 6;         /* 30 second limit on a subprocess */
 long monitor_count = 0;
 long monitor_active = 0;
 
-void monitor_fcn(int sig)
-{long status;
- my_signal(SIGALRM,monitor_fcn);
- alarm(monitor_period);
- if (monitor_active)
-   {++monitor_count;
-    if (monitor_count >= monitor_limit)
-      {sprintf(notes,"time limit reached on pid %ld 0x%lX. using kill.",
-               (long)monitor_pid,(long)monitor_pid);
-       note(3);
-       status = kill(monitor_pid,SIGKILL);
-       if (status < 0)
-         {sprintf(notes,"failed to kill process");
-          note(3);}
-       monitor_active = 0;}}}
+void
+monitor_fcn (int sig)
+{
+  long status;
+  my_signal (SIGALRM, monitor_fcn);
+  alarm (monitor_period);
+  if (monitor_active)
+    {
+      ++monitor_count;
+      if (monitor_count >= monitor_limit)
+        {
+          sprintf (notes, "time limit reached on pid %ld 0x%lX. using kill.",
+                   (long) monitor_pid, (long) monitor_pid);
+          note (3);
+          status = kill (monitor_pid, SIGKILL);
+          if (status < 0)
+            {
+              sprintf (notes, "failed to kill process");
+              note (3);
+            }
+          else
+            {
+              ++child_kill_count;
+            }
+          monitor_active = 0;
+        }
+    }
+}
 
-void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
-{long j,pid,n,seq,total_time,dys,hrs,mns,scs;
- int status;
- long pstatus;
- char arg2[20],arg4[20],arg5[20];
- time_t before_time,after_time;
- if (tflag == 1)
-   {seq = 1;
-    n = 100000000;}
- else if (nsubs < 0)
-   {n = -nsubs;
-    seq = 1;}
- else
-   {n = nsubs;
-    seq = 0;}
- if (seq == 1)
-   {my_signal(SIGALRM,monitor_fcn);
-    alarm(monitor_period);}
- time(&before_time);
- sprintf(arg5,"%ld",verbose_level);
- for(j=0;j<n;++j)
-   {sprintf(arg2,"%ld",sr+j);
-    sprintf(arg4,"%ld",j+1);
+void
+vfork_main (long tflag, long nsubs, char *cmd, char *nb, long sr, char *nt)
+{
+  long j, pid, n, seq, total_time, dys, hrs, mns, scs;
+  int status;
+  long pstatus;
+  char arg2[20], arg4[20], arg5[20];
+  time_t before_time, after_time;
+  if (tflag == 1)
+    {
+      seq = 1;
+      n = 100000000;
+    }
+  else if (nsubs < 0)
+    {
+      n = -nsubs;
+      seq = 1;
+    }
+  else
+    {
+      n = nsubs;
+      seq = 0;
+    }
+  if (seq == 1)
+    {
+      my_signal (SIGALRM, monitor_fcn);
+      alarm (monitor_period);
+    }
+  time (&before_time);
+  sprintf (arg5, "%ld", verbose_level);
+  for (j = 0; j < n; ++j)
+    {
+      sprintf (arg2, "%ld", sr + j);
+      sprintf (arg4, "%ld", j + 1);
 #ifdef VMS
-    pstatus = vfork();
+      pstatus = vfork ();
 #else
-    pstatus = fork();
+      pstatus = fork ();
 #endif
-    if (pstatus == 0)
-      {status = execlp(cmd,cmd,nb,arg2,nt,arg4,arg5,subprocess_ind,NULL);
-       if (status == -1)
-         {perror(cmd);
-          exit(1);}}
-    else if (pstatus < 0)
-      perror("fork");
-    else
-      {sprintf(notes,"pid = %ld 0x%lX (subprocess %ld)",pstatus,pstatus,j+1);
-       note(3);
-       if (seq == 1)
-         {monitor_pid = pstatus;
-          monitor_count = 0;
-          monitor_active = 1;
-          while((pid = wait(&status)) > 0)
-            {monitor_active = 0;
-              sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
-             note(3);
-             record_status(status);
-             record_note();
+      if (pstatus == 0)
+        {
+          status =
+            execlp (cmd, cmd, nb, arg2, nt, arg4, arg5, subprocess_ind, NULL);
+          if (status == -1)
+            {
+              perror (cmd);
+              exit (1);
+            }
+        }
+      else if (pstatus < 0)
+        perror ("fork");
+      else
+        {
+          sprintf (notes, "pid = %ld 0x%lX (subprocess %ld)", pstatus,
+                   pstatus, j + 1);
+          note (3);
+          if (seq == 1)
+            {
+              monitor_pid = pstatus;
+              monitor_count = 0;
+              monitor_active = 1;
+              while ((pid = wait (&status)) > 0)
+                {
+                  monitor_active = 0;
+                  sprintf (notes, "pid %ld 0x%lX exited with status %d",
+                           (long) pid, (long) pid, status);
+                  note (3);
+                  record_status (status);
+                  record_note ();
             }}
-       if (tflag == 1)
-         {time(&after_time);
-          total_time = after_time - before_time;
-          if (total_time >= nsubs)
-            {sprintf(notes,"Time limit reached after run %ld",j+1);
-             note(2);
-             record_note();
-             break;}}}}
- if (seq == 0)
-   while((pid = wait(&status)) > 0)
-     {sprintf(notes,"pid %ld 0x%lX exited with status %d",(long)pid,(long)pid,status);
-      note(3);
-      record_status(status);
-      record_note();
-     }
- time(&after_time);
- total_time = after_time - before_time;
- scs = total_time;
- mns = scs / 60;
- hrs = mns / 60;
- dys = hrs / 24;
- scs = scs % 60;
- mns = mns % 60;
- hrs = hrs % 24;
- sprintf(notes,
-         "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
-         (long)total_time,(long)dys,(long)hrs,(long)mns,(long)scs);
- note(1);
- summarize_status();
+          if (tflag == 1)
+            {
+              time (&after_time);
+              total_time = after_time - before_time;
+              if (total_time >= nsubs)
+                {
+                  sprintf (notes, "Time limit reached after run %ld", j + 1);
+                  note (2);
+                  record_note ();
+                  break;
+                }
+            }
+        }
+    }
+  if (seq == 0)
+    while ((pid = wait (&status)) > 0)
+      {
+        sprintf (notes, "pid %ld 0x%lX exited with status %d", (long) pid,
+                 (long) pid, status);
+        note (3);
+        record_status (status);
+        record_note ();
+      }
+  time (&after_time);
+  total_time = after_time - before_time;
+  scs = total_time;
+  mns = scs / 60;
+  hrs = mns / 60;
+  dys = hrs / 24;
+  scs = scs % 60;
+  mns = mns % 60;
+  hrs = hrs % 24;
+  sprintf (notes,
+           "Test complete, total real time: %ld seconds (%ld %02ld:%02ld:%02ld)",
+           (long) total_time, (long) dys, (long) hrs, (long) mns, (long) scs);
+  note (1);
+  summarize_status ();
 }
 
 #else
 
-char *find_exe_self(char *cmd)
+char *
+find_exe_self (char *cmd)
      /* function grabbed from SIOD */
-{DWORD retsize;
- char exe_self[512];
- retsize = SearchPath(NULL,cmd,".EXE",sizeof(exe_self),exe_self,NULL);
- if (retsize > 0)
-  return(_strdup(exe_self));
- else
-  return(cmd);}
+{
+  DWORD retsize;
+  char exe_self[512];
+  retsize = SearchPath (NULL, cmd, ".EXE", sizeof (exe_self), exe_self, NULL);
+  if (retsize > 0)
+    return (_strdup (exe_self));
+  else
+    return (cmd);
+}
 
-void chk_CloseHandle(HANDLE h)
-{DWORD err;
- if (CloseHandle(h) == FALSE)
-   {err = GetLastError();
-    sprintf(notes,"err %d trying to close handle.",err);
-    note(3);}}
+void
+chk_CloseHandle (HANDLE h)
+{
+  DWORD err;
+  if (CloseHandle (h) == FALSE)
+    {
+      err = GetLastError ();
+      sprintf (notes, "err %d trying to close handle.", err);
+      note (3);
+    }
+}
 
-int maxticks = 100; /* tenths of a second before forced termination
-                       of the subprocess */
+int maxticks = 100;             /* tenths of a second before forced termination
+                                   of the subprocess */
 
-void vfork_main(long tflag,long nsubs,char *cmd,char *nb,long sr,char *nt)
-{long j,n,seq,total_time,dys,hrs,mns,scs;
- char arg0[512];
- char arg2[20],arg4[20],arg5[20];
- time_t before_time,after_time;
- char cmdbuf[1024];
- int nticks;
- PROCESS_INFORMATION pinfo;
- STARTUPINFO sinfo;
- DWORD exit_code,err;
- if (tflag == 1)
-   {seq = 1;
-    n = 100000000;}
- else if (nsubs < 0)
-   {n = -nsubs;
-    seq = 1;}
- else
-   {n = nsubs;
-    seq = 0;}
- /* tflag says this is a timed run. So nsub is the time in seconds.
-    seq says to run in sequence, not created nsub processes all
-    at once. */
- if (seq == 0)
-   {printf("Not implemented. Use [-nsub] or [HH:MM:SS] instead.\n");
-    return;}
- time(&before_time);
- sprintf(arg5,"%d",verbose_level);
- for(j=0;j<n;++j)
-   {sprintf(arg0,"%s",find_exe_self(cmd));
-    sprintf(arg2,"%d",sr+j);
-    sprintf(arg4,"%d",j+1);
-    sprintf(cmdbuf,"\"%s\" %s %s %s %s %s %s",
-            cmd,nb,arg2,nt,arg4,arg5,subprocess_ind);
-    memset(&sinfo,0,sizeof(sinfo));
-    memset(&pinfo,0,sizeof(pinfo));
-    sinfo.cb = sizeof(sinfo);
-    if (CreateProcess(arg0,cmdbuf,NULL,NULL,TRUE,0,NULL,NULL,&sinfo,&pinfo)
-        == FALSE)
-      {err = GetLastError();
-       sprintf(notes,"err %d trying to create process",err);
-       note(1);
-       record_note();
-       continue;}
-    sprintf(notes,"pid = %d 0x%X (subprocess %d)",
-            pinfo.dwProcessId,pinfo.dwProcessId,j+1);
-    note(3);
-    record_note();
-    nticks = 0;
-    while(1)
-      {if (GetExitCodeProcess(pinfo.hProcess,&exit_code) == TRUE)
-         {if (exit_code == STILL_ACTIVE)
-            {if (nticks == maxticks)
-               {sprintf(notes,"time limit reached on pid %d 0x%X. using kill.",
-                        pinfo.dwProcessId,pinfo.dwProcessId);
-                note(3);
-                record_note();
-                if (TerminateProcess(pinfo.hProcess,
-                                     APPLICATION_ERROR_MASK |
-                                     ERROR_SEVERITY_ERROR |
-                                     1) == FALSE)
-                  {err = GetLastError();
-                   sprintf(notes,"err %d trying to terminate process.",err);
-                   note(3);
-                   record_note();
-                   chk_CloseHandle(pinfo.hProcess);
-                   chk_CloseHandle(pinfo.hThread);
-                   break;}
-                ++nticks;}
-            else
-              {++nticks;
-               Sleep(100);}}
-         else
-           {sprintf(notes,"pid %d 0x%X exited with status %d",
-                    pinfo.dwProcessId,pinfo.dwProcessId,exit_code);
-            note(3);
-            record_status(exit_code);
-            chk_CloseHandle(pinfo.hProcess);
-            chk_CloseHandle(pinfo.hThread);
-            record_note();
-            break;}}
-      else
-        {err = GetLastError();
-         sprintf(notes,"err %d on GetExitCodeProcess.");
-         note(3);
-         chk_CloseHandle(pinfo.hProcess);
-         chk_CloseHandle(pinfo.hThread);
-         record_note();
-         break;}}
-    if (tflag == 1)
-      {time(&after_time);
-       total_time = (long) (after_time - before_time);
-       if (total_time >= nsubs)
-         {sprintf(notes,"Time limit reached after run %d",j+1);
-          note(2);
-          record_note();
-          break;}}}
- time(&after_time);
- total_time = (long) (after_time - before_time);
- scs = total_time;
- mns = scs / 60;
- hrs = mns / 60;
- dys = hrs / 24;
- scs = scs % 60;
- mns = mns % 60;
- hrs = hrs % 24;
- sprintf(notes,
-         "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
-         total_time,dys,hrs,mns,scs);
- note(1);
- summarize_status();}
+void
+vfork_main (long tflag, long nsubs, char *cmd, char *nb, long sr, char *nt)
+{
+  long j, n, seq, total_time, dys, hrs, mns, scs;
+  char arg0[512];
+  char arg2[20], arg4[20], arg5[20];
+  time_t before_time, after_time;
+  char cmdbuf[1024];
+  int nticks;
+  PROCESS_INFORMATION pinfo;
+  STARTUPINFO sinfo;
+  DWORD exit_code, err;
+  if (tflag == 1)
+    {
+      seq = 1;
+      n = 100000000;
+    }
+  else if (nsubs < 0)
+    {
+      n = -nsubs;
+      seq = 1;
+    }
+  else
+    {
+      n = nsubs;
+      seq = 0;
+    }
+  /* tflag says this is a timed run. So nsub is the time in seconds.
+     seq says to run in sequence, not created nsub processes all
+     at once. */
+  if (seq == 0)
+    {
+      printf ("Not implemented. Use [-nsub] or [HH:MM:SS] instead.\n");
+      return;
+    }
+  time (&before_time);
+  sprintf (arg5, "%d", verbose_level);
+  for (j = 0; j < n; ++j)
+    {
+      sprintf (arg0, "%s", find_exe_self (cmd));
+      sprintf (arg2, "%d", sr + j);
+      sprintf (arg4, "%d", j + 1);
+      sprintf (cmdbuf, "\"%s\" %s %s %s %s %s %s",
+               cmd, nb, arg2, nt, arg4, arg5, subprocess_ind);
+      memset (&sinfo, 0, sizeof (sinfo));
+      memset (&pinfo, 0, sizeof (pinfo));
+      sinfo.cb = sizeof (sinfo);
+      if (CreateProcess
+          (arg0, cmdbuf, NULL, NULL, TRUE, 0, NULL, NULL, &sinfo,
+           &pinfo) == FALSE)
+        {
+          err = GetLastError ();
+          sprintf (notes, "err %d trying to create process", err);
+          note (1);
+          record_note ();
+          continue;
+        }
+      sprintf (notes, "pid = %d 0x%X (subprocess %d)",
+               pinfo.dwProcessId, pinfo.dwProcessId, j + 1);
+      note (3);
+      record_note ();
+      nticks = 0;
+      while (1)
+        {
+          if (GetExitCodeProcess (pinfo.hProcess, &exit_code) == TRUE)
+            {
+              if (exit_code == STILL_ACTIVE)
+                {
+                  if (nticks == maxticks)
+                    {
+                      sprintf (notes,
+                               "time limit reached on pid %d 0x%X. using kill.",
+                               pinfo.dwProcessId, pinfo.dwProcessId);
+                      note (3);
+                      record_note ();
+                      if (TerminateProcess (pinfo.hProcess,
+                                            APPLICATION_ERROR_MASK |
+                                            ERROR_SEVERITY_ERROR |
+                                            1) == FALSE)
+                        {
+                          err = GetLastError ();
+                          sprintf (notes,
+                                   "err %d trying to terminate process.",
+                                   err);
+                          note (3);
+                          record_note ();
+                          chk_CloseHandle (pinfo.hProcess);
+                          chk_CloseHandle (pinfo.hThread);
+                          break;
+                        }
+                      else
+                        {
+                          ++child_kill_count;
+                        }
+                      ++nticks;
+                    }
+                  else
+                    {
+                      ++nticks;
+                      Sleep (100);
+                    }
+                }
+              else
+                {
+                  sprintf (notes, "pid %d 0x%X exited with status %d",
+                           pinfo.dwProcessId, pinfo.dwProcessId, exit_code);
+                  note (3);
+                  record_status (exit_code);
+                  chk_CloseHandle (pinfo.hProcess);
+                  chk_CloseHandle (pinfo.hThread);
+                  record_note ();
+                  break;
+                }
+            }
+          else
+            {
+              err = GetLastError ();
+              sprintf (notes, "err %d on GetExitCodeProcess.");
+              note (3);
+              chk_CloseHandle (pinfo.hProcess);
+              chk_CloseHandle (pinfo.hThread);
+              record_note ();
+              break;
+            }
+        }
+      if (tflag == 1)
+        {
+          time (&after_time);
+          total_time = (long) (after_time - before_time);
+          if (total_time >= nsubs)
+            {
+              sprintf (notes, "Time limit reached after run %d", j + 1);
+              note (2);
+              record_note ();
+              break;
+            }
+        }
+    }
+  time (&after_time);
+  total_time = (long) (after_time - before_time);
+  scs = total_time;
+  mns = scs / 60;
+  hrs = mns / 60;
+  dys = hrs / 24;
+  scs = scs % 60;
+  mns = mns % 60;
+  hrs = hrs % 24;
+  sprintf (notes,
+           "Test complete, total real time: %d seconds (%d %02d:%02d:%02d)",
+           total_time, dys, hrs, mns, scs);
+  note (1);
+  summarize_status ();
+}
 
 #endif
