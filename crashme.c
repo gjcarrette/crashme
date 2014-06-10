@@ -2,7 +2,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.8.3 2-JUN-2014";
+char *crashme_version = "2.8.4 10-JUN-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -69,6 +69,7 @@ Version Date         Description
  2.8.1  27-MAY-2014  Debian patch to use execlp instead of execl
  2.8.2  29-MAY-2014  fix bug in call to memset.
  2.8.3   2-JUN-2014  gnu indent
+ 2.8.4  10-JUN-2014  Microsoft Windows 64-bit Upgrade.
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -325,7 +326,18 @@ bad_malloc (long n)
     }
   else
     {
+#ifdef WIN32
+      data = VirtualAlloc (NULL,
+                           (SIZE_T) n,
+                           MEM_COMMIT | MEM_RESERVE,
+                           PAGE_EXECUTE_READWRITE);
+      if (data == NULL) {
+        fprintf (stderr, "VirtualAlloc Failed %ld\n", (long) GetLastError ());
+        return(data);
+      }
+#else
       data = (unsigned char *) malloc (n);
+#endif
     }
   if (data == NULL)
     {
@@ -761,17 +773,76 @@ old_main (int argc, char **argv)
 }
 
 #ifdef WIN32
+
+char *
+likely_exception_string (DWORD value)
+{
+  switch (value)
+    {
+    case EXCEPTION_ACCESS_VIOLATION:
+      return("EXCEPTION_ACCESS_VIOLATION");
+    case EXCEPTION_DATATYPE_MISALIGNMENT:
+      return("EXCEPTION_DATATYPE_MISALIGNMENT");
+    case EXCEPTION_BREAKPOINT:
+      return("EXCEPTION_BREAKPOINT");
+    case EXCEPTION_SINGLE_STEP:
+      return("EXCEPTION_SINGLE_STEP");
+    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+      return("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
+    case EXCEPTION_FLT_DENORMAL_OPERAND:
+      return("EXCEPTION_FLT_DENORMAL_OPERAND");
+    case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+      return("EXCEPTION_FLT_DIVIDE_BY_ZERO");
+    case EXCEPTION_FLT_INEXACT_RESULT:
+      return("EXCEPTION_FLT_INEXACT_RESULT");
+    case EXCEPTION_FLT_INVALID_OPERATION:
+      return("EXCEPTION_FLT_INVALID_OPERATION");
+    case EXCEPTION_FLT_OVERFLOW:
+      return("EXCEPTION_FLT_OVERFLOW");
+    case EXCEPTION_FLT_STACK_CHECK:
+      return("EXCEPTION_FLT_STACK_CHECK");
+    case EXCEPTION_FLT_UNDERFLOW:
+      return("EXCEPTION_FLT_UNDERFLOW");
+    case EXCEPTION_INT_DIVIDE_BY_ZERO:
+      return("EXCEPTION_INT_DIVIDE_BY_ZERO");
+    case EXCEPTION_INT_OVERFLOW:
+      return("EXCEPTION_INT_OVERFLOW");
+    case EXCEPTION_PRIV_INSTRUCTION:
+      return("EXCEPTION_PRIV_INSTRUCTION");
+    case EXCEPTION_IN_PAGE_ERROR:
+      return("EXCEPTION_IN_PAGE_ERROR");
+    case EXCEPTION_ILLEGAL_INSTRUCTION:
+      return("EXCEPTION_ILLEGAL_INSTRUCTION");
+    case EXCEPTION_NONCONTINUABLE_EXCEPTION:
+      return("EXCEPTION_NONCONTINUABLE_EXCEPTION");
+    case EXCEPTION_STACK_OVERFLOW:
+      return("EXCEPTION_STACK_OVERFLOW");
+    case EXCEPTION_INVALID_DISPOSITION:
+      return("EXCEPTION_INVALID_DISPOSITION");
+    case EXCEPTION_GUARD_PAGE:
+      return("EXCEPTION_GUARD_PAGE");
+    case EXCEPTION_INVALID_HANDLE:
+      return("EXCEPTION_INVALID_HANDLE");
+    case CONTROL_C_EXIT:
+      return("CONTROL_C_EXIT");
+    default:
+      return("");
+    }
+}
+
 DWORD
 exception_filter (DWORD value)
 {
   int sev, cus, res, fac, cod;
+  char *str;
   sev = 3 & (value >> 30);
   cus = 1 & (value >> 29);
   res = 1 & (value >> 28);
   fac = 07777 & (value >> 16);
   cod = 0xFFFF & value;
-  sprintf (notes, "sev(%d)cus(%d)res(%d)fac(%d)code(%d)",
-           sev, cus, res, fac, cod);
+  str = likely_exception_string(value);
+  sprintf (notes, "sev(%d)cus(%d)res(%d)fac(%d)code(%d) %s",
+           sev, cus, res, fac, cod, str);
   note (5);
   return (EXCEPTION_EXECUTE_HANDLER);
 }
@@ -851,6 +922,7 @@ void
 summarize_status (void)
 {
   struct status_list *l;
+  char *status_str = "";
   int n = 0;
   sprintf (notes, "child_kill_count %ld", child_kill_count);
   note (2);
@@ -858,7 +930,10 @@ summarize_status (void)
   note (2);
   for (l = slist; l != NULL; l = l->next)
     {
-      sprintf (notes, "%11ld ... %5ld", (long) l->status, (long) l->count);
+#ifdef WIN32
+      status_str = likely_exception_string (l->status);
+#endif
+      sprintf (notes, "%11ld %s ... %5ld", (long) l->status, status_str, (long) l->count);
       note (2);
       ++n;
     }
@@ -1161,7 +1236,7 @@ vfork_main (long tflag, long nsubs, char *cmd, char *nb, long sr, char *nt)
           else
             {
               err = GetLastError ();
-              sprintf (notes, "err %d on GetExitCodeProcess.");
+              sprintf (notes, "err %d on GetExitCodeProcess.", err);
               note (3);
               chk_CloseHandle (pinfo.hProcess);
               chk_CloseHandle (pinfo.hThread);

@@ -1,6 +1,6 @@
 @SET SELF=%~dp0
-@PATH %SELF%output\Release\pddet;%SELF%output\Release\crashme;%SELF%;%PATH%
-@SET LOG_FOLDER=%SELF%\LOGS
+@PATH %SELF%output\pddet\Release\x64;%SELF%output\crashme\Release\x64;%SELF%;%PATH%
+@SET LOG_FOLDER=%TEMP%\CRASHME-LOGS
 @SET LOG_PREFIX=%LOG_FOLDER%\
 @
 @IF EXIST "%SELF%SETUP-LOCAL.CMD" ECHO USING "%SELF%SETUP-LOCAL.CMD"

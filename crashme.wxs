@@ -1,116 +1,118 @@
-<?xml version="1.0"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2003/01/wi">
- <Product Id="????????-????-????-????-????????????"
-          UpgradeCode="777642F9-DDFA-41E7-8B28-012FCD04FCB0" 
-          Name="CRASHME v2.6" 
-          Language="1033" 
-          Version="2.6" 
-          Manufacturer="George J. Carrette">
-  <Package Id="????????-????-????-????-????????????"
-           Description="CRASHME a system robustness tester, version 2.6"
-           Comments="CRASHME"
-           Manufacturer="George J. Carrette" 
-           InstallerVersion="200" 
-           Compressed="yes" />
-  <Property Id="ARPURLINFOABOUT" Value="http://alum.mit.edu/www/gjc/crashme.html" />
-  <Property Id="ARPURLUPDATEINFO" Value="http://www.codeplex.com/crashme" />
-  <Property Id="ALLUSERS" Value="1"/>
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           UpgradeCode="777642F9-DDFA-41E7-8B28-012FCD04FCB0" 
+           Name="CRASHME v2.8.4" 
+           Language="1033" 
+           Version="2.8.4" 
+           Manufacturer="George J. Carrette">
+    <Package Description="CRASHME a system robustness tester, version 2.8.4"
+             Comments="CRASHME"
+             Manufacturer="George J. Carrette" 
+             InstallerVersion="200" 
+             Compressed="yes" />
+    <Property Id="ARPURLINFOABOUT" Value="http://alum.mit.edu/www/gjc/crashme.html" />
+    <Property Id="ARPURLUPDATEINFO" Value="http://www.codeplex.com/crashme" />
+    <Property Id="ALLUSERS" Value="1"/>
 
-  <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
-  <Directory Id="TARGETDIR" Name="SourceDir">
-   <Directory Id="StartMenuFolder" Name="StrtFldr">
-    <Directory Id="ProgramMenuFolder" Name="PrgFldr">
-     <Directory Id="CRASHMEProgramsFolder" Name="CRASHME"/>
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+
+    <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="StartMenuFolder" Name="StrtFldr">
+        <Directory Id="ProgramMenuFolder" Name="PrgFldr">
+          <Directory Id="CRASHMEProgramsFolder" Name="CRASHME"/>
+        </Directory>
+      </Directory>
+      
+      <Directory Id="ProgramFilesFolder" Name="PFiles">
+        <Directory Id="CRASHMEDIR" Name="CRASHME">
+          <Component Id="CRASHMEProgram" Guid="A320292B-725D-40F5-B09A-E0B0C7735A28">
+            
+            <File Id="FILE00.DAT" Source="TEST1.BAT" />
+            <File Id="FILE01.DAT" Source="build.bat" />
+            <File Id="FILE02.DAT" Source="crashme.c" />
+            <File Id="FILE03.DAT" Source="crashme.html" />
+            <File Id="FILE04.DAT" Source="crashme.sln" />
+            <File Id="FILE05.DAT" Source="crashme.txt" />
+            <File Id="FILE06.DAT" Source="crashme.vcxproj" />
+            <File Id="FILE06.DA1" Source="crashme.vcxproj.filters" />
+            <File Id="FILE07.DAT" Source="crashme.wxs" />
+            <File Id="FILE08.DAT" Source="license.rtf" />
+            <File Id="FILE09.DAT" Source="pddet.c" />
+            <File Id="FILE10.DAT" Source="pddet.vcxproj" />
+            <File Id="FILE10.DA1" Source="pddet.vcxproj.filters" />
+            <File Id="FILE11.DAT" Source="output/pddet/Release/x64/pddet.exe" />
+            <File Id="FILE12.DAT" Source="output/crashme/Release/x64/crashme.exe" />
+            <File Id="FILE13.DAT" Source="mt19937ar.c" />
+            <File Id="FILE14.DAT" Source="mt19937ar.h" />
+            <File Id="FILE15.DAT" Source="TEST2.BAT" />
+            <File Id="FILE16.DAT" Source="SETUP.CMD" />
+            <File Id="FILE17.DAT" Source="TEST3.BAT" />
+            <File Id="FILE18.DAT" Source="vnsq.h" />
+            <File Id="FILE19.DAT" Source="vnsq.c" />
+            <File Id="FILE20.DAT" Source="TEST4.BAT" />
+          </Component>
+        </Directory>
+      </Directory>
     </Directory>
-   </Directory>
-
-   <Directory Id="ProgramFilesFolder" Name="PFiles">
-    <Directory Id="CRASHMEDIR" Name="CRASHME">
-     <Component Id="CRASHMEProgram" Guid="A320292B-725D-40F5-B09A-E0B0C7735A28">
-
-     <File Id="FILE00.DAT" Name="FILE00.DAT" LongName="TEST1.BAT" Source="TEST1.BAT" DiskId="1"/>
-     <File Id="FILE01.DAT" Name="FILE01.DAT" LongName="build.bat" Source="build.bat" DiskId="1"/>
-     <File Id="FILE02.DAT" Name="FILE02.DAT" LongName="crashme.c" Source="crashme.c" DiskId="1"/>
-     <File Id="FILE03.DAT" Name="FILE03.DAT" LongName="crashme.html" Source="crashme.html" DiskId="1"/>
-     <File Id="FILE04.DAT" Name="FILE04.DAT" LongName="crashme.sln" Source="crashme.sln" DiskId="1"/>
-     <File Id="FILE05.DAT" Name="FILE05.DAT" LongName="crashme.txt" Source="crashme.txt" DiskId="1"/>
-     <File Id="FILE06.DAT" Name="FILE06.DAT" LongName="crashme.vcproj" Source="crashme.vcproj" DiskId="1"/>
-     <File Id="FILE07.DAT" Name="FILE07.DAT" LongName="crashme.wxs" Source="crashme.wxs" DiskId="1"/>
-     <File Id="FILE08.DAT" Name="FILE08.DAT" LongName="license.rtf" Source="license.rtf" DiskId="1"/>
-     <File Id="FILE09.DAT" Name="FILE09.DAT" LongName="pddet.c" Source="pddet.c" DiskId="1"/>
-     <File Id="FILE10.DAT" Name="FILE10.DAT" LongName="pddet.vcproj" Source="pddet.vcproj" DiskId="1"/>
-     <File Id="FILE11.DAT" Name="FILE11.DAT" LongName="pddet.exe" Source="output/Release/pddet/pddet.exe" DiskId="1"/>
-     <File Id="FILE12.DAT" Name="FILE12.DAT" LongName="crashme.exe" Source="output/Release/crashme/crashme.exe" DiskId="1"/>
-     <File Id="FILE13.DAT" Name="FILE13.DAT" LongName="mt19937ar.c" Source="mt19937ar.c" DiskId="1"/>
-     <File Id="FILE14.DAT" Name="FILE14.DAT" LongName="mt19937ar.h" Source="mt19937ar.h" DiskId="1"/>
-     <File Id="FILE15.DAT" Name="FILE15.DAT" LongName="TEST2.BAT" Source="TEST2.BAT" DiskId="1"/>
-     <File Id="FILE16.DAT" Name="FILE16.DAT" LongName="SETUP.CMD" Source="SETUP.CMD" DiskId="1"/>
-     <File Id="FILE17.DAT" Name="FILE17.DAT" LongName="TEST3.BAT" Source="TEST3.BAT" DiskId="1"/>
-     <File Id="FILE18.DAT" Name="FILE18.DAT" LongName="vnsq.h" Source="vnsq.h" DiskId="1"/>
-     <File Id="FILE19.DAT" Name="FILE19.DAT" LongName="vnsq.c" Source="vnsq.c" DiskId="1"/>
-     <File Id="FILE20.DAT" Name="FILE20.DAT" LongName="TEST4.BAT" Source="TEST4.BAT" DiskId="1"/>
-     </Component>
-    </Directory>
-   </Directory>
-  </Directory>
-
-  <DirectoryRef Id="CRASHMEProgramsFolder">
-   <Component Id="CRASHMEShortcut" Guid="33C535B1-7D07-44E6-B6C6-7E3ACF3083FA" DiskId="1">
-    <Shortcut Id="CRASHMEShortcut01" Name="TEST1.BAT" 
-              Description="TEST 1" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\TEST1.BAT" 
-               />
-    <Shortcut Id="CRASHMEShortcut02" Name="TEST2.BAT" 
-              Description="TEST 2" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\TEST2.BAT" 
-               />
-    <Shortcut Id="CRASHMEShortcut03" Name="TEST3.BAT" 
-              Description="TEST 3" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\TEST3.BAT" 
-               />
-    <Shortcut Id="CRASHMEShortcut04" Name="TEST4.BAT" 
-              Description="TEST 4" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\TEST4.BAT" 
-               />
-    <Shortcut Id="CRASHMEShortcut05" 
-              Name="license.rtf"  LongName="license.rtf"
-              Description="CRASHME License" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\license.rtf" 
-              />
-    <Shortcut Id="CRASHMEShortcut06" 
-              Name="crashme.htm"  LongName="crashme.html"
-              Description="CRASHME Documentation" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\crashme.html" 
-              />
-    <Shortcut Id="CRASHMEShortcut07" 
-              Name="crashme.htm"  LongName="crashme.txt"
-              Description="CRASHME Documentation" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]\crashme.txt" 
-              />
-    <Shortcut Id="CRASHMEShortcut08" 
-              Name="SHORT5.DAT"  LongName="Crashme"
-              Description="CRASHME Installation Folder" 
-              Directory="CRASHMEProgramsFolder" 
-              Target="[CRASHMEDIR]" 
-              />
-   </Component>
-  </DirectoryRef>
-
-  <Feature Id="FeatureCrashme1" 
-           Title="Crashme" Level="1" ConfigurableDirectory="CRASHMEDIR">
-   <ComponentRef Id="CRASHMEProgram" />
-   <ComponentRef Id="CRASHMEShortcut" />
-  </Feature>
-
-
-  <UIRef Id="WixUI_Mondo" /> 
-
- </Product>
+    
+    <DirectoryRef Id="CRASHMEProgramsFolder">
+      <Component Id="CRASHMEShortcut" Guid="33C535B1-7D07-44E6-B6C6-7E3ACF3083FA" >
+        <Shortcut Id="CRASHMEShortcut01" Name="TEST1.BAT" 
+                  Description="TEST 1" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\TEST1.BAT" 
+                  />
+        <Shortcut Id="CRASHMEShortcut02" Name="TEST2.BAT" 
+                  Description="TEST 2" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\TEST2.BAT" 
+                  />
+        <Shortcut Id="CRASHMEShortcut03" Name="TEST3.BAT" 
+                  Description="TEST 3" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\TEST3.BAT" 
+                  />
+        <Shortcut Id="CRASHMEShortcut04" Name="TEST4.BAT" 
+                  Description="TEST 4" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\TEST4.BAT" 
+                  />
+        <Shortcut Id="CRASHMEShortcut05" 
+                  Name="license.rtf"
+                  Description="CRASHME License" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\license.rtf" 
+                  />
+        <Shortcut Id="CRASHMEShortcut06" 
+                  Name="crashme.html"
+                  Description="CRASHME Documentation" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\crashme.html" 
+                  />
+        <Shortcut Id="CRASHMEShortcut07" 
+                  Name="crashme.txt"
+                  Description="CRASHME Documentation" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]\crashme.txt" 
+                  />
+        <Shortcut Id="CRASHMEShortcut08" 
+                  Name="Crashme"
+                  Description="CRASHME Installation Folder" 
+                  Directory="CRASHMEProgramsFolder" 
+                  Target="[CRASHMEDIR]" 
+                  />
+      </Component>
+    </DirectoryRef>
+    
+    <Feature Id="FeatureCrashme1" 
+             Title="Crashme" Level="1" ConfigurableDirectory="CRASHMEDIR">
+      <ComponentRef Id="CRASHMEProgram" />
+      <ComponentRef Id="CRASHMEShortcut" />
+    </Feature>
+    
+    <UIRef Id="WixUI_Mondo" /> 
+    
+  </Product>
 </Wix>

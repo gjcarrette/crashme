@@ -25,7 +25,7 @@ vnsq_int32 (void)
   char *nextp;
   nextn = vnsq_value * vnsq_value;
   sprintf (decimalrep, "%lu", nextn);
-  nextlen = strlen (decimalrep);
+  nextlen = (int) (strlen (decimalrep));
   excess = nextlen - 6;
   if (excess > 0)
     {
