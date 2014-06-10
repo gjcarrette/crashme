@@ -311,10 +311,11 @@ struct adelt
   long count;
 };
 
-int
-apairl (a, b)
-     struct apair *a, *b;
+int __cdecl
+apairl (const void *v_a, const void *v_b)
 {
+  const struct apair *a = v_a;
+  const struct apair *b = v_b;
   if (a->addr < b->addr)
     return (-1);
   else if (a->addr > b->addr)
@@ -323,10 +324,12 @@ apairl (a, b)
     return (0);
 }
 
-int
-adeltl (a, b)
-     struct adelt *a, *b;
+int __cdecl
+adeltl (const void *v_a, const void *v_b)
 {
+  const struct adelt *a = v_a;
+  const struct adelt *b = v_b;
+
   if (a->delta < b->delta)
     return (-1);
   else if (a->delta > b->delta)
@@ -345,7 +348,7 @@ main (argc, argv)
   long j, k, n = 10, min_delta, max_delta, delta, d, ebytes = 0;
   unsigned char *data, *prev_data;
   printf ("Crashme(pddet): (c) Copyright 1990-2012 George J. Carrette\n");
-  printf ("From http://alum.mit.edu/www/gjc/crashme.html");
+  printf ("From http://alum.mit.edu/www/gjc/crashme.html\n");
   printf ("sizeof(char)   = %ld\n", (long) sizeof (char));
   printf ("sizeof(char *) = %ld\n", (long) sizeof (char *));
   printf ("sizeof(int)    = %ld\n", (long) sizeof (int));

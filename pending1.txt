@@ -4,6 +4,8 @@ as the new version. I also have some code snippets deep in some email
 from long again with changes to deal with other memory protection
 architecture issues
 
+Note: http://www.linkedin.com/in/gregopp
+
 
 Date: Fri, 23 May 2008 08:31:31 -0400
 From: gregory opp - Sun Microsystems - Burlington United States
