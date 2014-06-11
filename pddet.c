@@ -49,6 +49,10 @@ is contained in the pointer to a procedure data.
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 struct v
 {
   long n;
@@ -338,6 +342,28 @@ adeltl (const void *v_a, const void *v_b)
     return (0);
 }
 
+#ifdef WIN32
+void
+describe_system_info(void)
+{
+  /* %I64X */
+
+  SYSTEM_INFO si;
+  GetSystemInfo(&si);
+  printf ("%30s = %ld\n", "wProcessorArchitecture", (long) si.wProcessorArchitecture);
+  printf ("%30s = %ld\n", "wReserved;", (long) si.wReserved);
+  printf ("%30s = %ld\n", "dwPageSize", (long) si.dwPageSize);
+  printf ("%30s = 0x%016llX\n", "lpMinimumApplicationAddress", (long long) si.lpMinimumApplicationAddress);
+  printf ("%30s = 0x%016llX\n", "lpMaximumApplicationAddress", (long long) si.lpMaximumApplicationAddress);
+  printf ("%30s = 0x%lX\n", "dwActiveProcessorMask", (long) si.dwActiveProcessorMask);
+  printf ("%30s = %ld\n", "dwNumberOfProcessors", (long) si.dwNumberOfProcessors);
+  printf ("%30s = %ld\n", "dwProcessorType", (long) si.dwProcessorType);
+  printf ("%30s = %ld\n", "dwAllocationGranularity", (long) si.dwAllocationGranularity);
+  printf ("%30s = %ld\n", "wProcessorLevel", (long) si.wProcessorLevel);
+  printf ("%30s = 0x%lX\n", "wProcessorRevision", (long) si.wProcessorRevision);
+}
+#endif
+
 int
 main (argc, argv)
      int argc;
@@ -347,12 +373,15 @@ main (argc, argv)
   struct adelt deltas[10];
   long j, k, n = 10, min_delta, max_delta, delta, d, ebytes = 0;
   unsigned char *data, *prev_data;
-  printf ("Crashme(pddet): (c) Copyright 1990-2012 George J. Carrette\n");
+  printf ("Crashme(pddet): (c) Copyright 1990-2014 George J. Carrette\n");
   printf ("From http://alum.mit.edu/www/gjc/crashme.html\n");
   printf ("sizeof(char)   = %ld\n", (long) sizeof (char));
   printf ("sizeof(char *) = %ld\n", (long) sizeof (char *));
   printf ("sizeof(int)    = %ld\n", (long) sizeof (int));
   printf ("sizeof(long)   = %ld\n", (long) sizeof (long));
+#ifdef WIN32
+  describe_system_info ();
+#endif
   for (j = 1; (j + 1) < argc; j += 2)
     {
       if (strcmp (argv[j], "-examine") == 0)
