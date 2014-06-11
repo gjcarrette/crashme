@@ -16,6 +16,8 @@
     <Property Id="ALLUSERS" Value="1"/>
 
     <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="wiener-banner-493x58.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="crashme-install-dialog-493x312.bmp" />
 
     <Media Id="1" Cabinet="product.cab" EmbedCab="yes" />
     <Directory Id="TARGETDIR" Name="SourceDir">
@@ -52,6 +54,8 @@
             <File Id="FILE18.DAT" Source="vnsq.h" />
             <File Id="FILE19.DAT" Source="vnsq.c" />
             <File Id="FILE20.DAT" Source="TEST4.BAT" />
+	    <File Id="FILE21.DAT" Source="wiener-banner-493x58.bmp" />
+	    <File Id="FILE22.DAT" Source="crashme-install-dialog-493x312.bmp" />
           </Component>
         </Directory>
       </Directory>

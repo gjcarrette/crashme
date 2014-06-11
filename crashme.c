@@ -933,7 +933,7 @@ summarize_status (void)
 #ifdef WIN32
       status_str = likely_exception_string (l->status);
 #endif
-      sprintf (notes, "%11ld %s ... %5ld", (long) l->status, status_str, (long) l->count);
+      sprintf (notes, "%11ld ... %5ld %s", (long) l->status, (long) l->count, status_str);
       note (2);
       ++n;
     }

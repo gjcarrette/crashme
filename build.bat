@@ -17,6 +17,6 @@
 @ECHO Linking CRASHME installer.
 @
 @IF EXIST CRASHME.MSI DEL CRASHME.MSI
-@LIGHT CRASHME.WIXOBJ  -ext WixUIExtension -nologo -out CRASHME.MSI
+@LIGHT CRASHME.WIXOBJ  -ext WixUIExtension -nologo -out CRASHME-2-8-4.MSI
 @
 @Echo Build Done
