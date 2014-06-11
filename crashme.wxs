@@ -111,9 +111,16 @@
     </DirectoryRef>
     
     <Feature Id="FeatureCrashme1" 
-             Title="Crashme" Level="1" ConfigurableDirectory="CRASHMEDIR">
+             Title="Crashme"
+	     Level="1"
+	     ConfigurableDirectory="CRASHMEDIR">
       <ComponentRef Id="CRASHMEProgram" />
-      <ComponentRef Id="CRASHMEShortcut" />
+    </Feature>
+    <Feature Id="FeatureCrashme2"
+	     Title="Program Menu Short Cuts"
+	     Level="1"
+	     ConfigurableDirectory="CRASHMEDIR">
+      <ComponentRef Id="CRASHMEShortcut"/>
     </Feature>
     
     <UIRef Id="WixUI_Mondo" /> 
