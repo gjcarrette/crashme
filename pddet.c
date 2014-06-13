@@ -315,6 +315,10 @@ struct adelt
   long count;
 };
 
+#ifndef WIN32
+#define __cdecl
+#endif
+
 int __cdecl
 apairl (const void *v_a, const void *v_b)
 {
