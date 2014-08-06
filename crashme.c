@@ -2,7 +2,7 @@
 /* crashme: Create a string of random bytes and then jump to it.
             crashme [+]<nbytes>[.inc] <srand> <ntrys> [nsub] [verboseness] */
 
-char *crashme_version = "2.8.4 10-JUN-2014";
+char *crashme_version = "2.8.5 6-AUG-2014";
 
 /*
  *             COPYRIGHT (c) 1990-2014 BY        *
@@ -70,6 +70,7 @@ Version Date         Description
  2.8.2  29-MAY-2014  fix bug in call to memset.
  2.8.3   2-JUN-2014  gnu indent
  2.8.4  10-JUN-2014  Microsoft Windows 64-bit Upgrade.
+ 2.8.5   6-AUG-2014  bugs.debian.org bug=755759 struct sigaction
 
 Suggested test: At least let the thing run the length of your lunch break,
 in this case 1 hour, 10 minutes, and 30 seconds.
@@ -105,6 +106,7 @@ Crashme Ver   Make    Model OS Version   Arguments      by:
  9-SEP-93 2.0 Microsoft WNT Build 511 i486 +1000 24131 50 gjc@mitech.com
  3-FEB-94 1.8 HP710/HP-UX 9.00 +2000 666 100 2:00:00 5 UFOP@fpsp.fapesp.br
  5-MAY-94 2.0 HP807/HPUX 9.00  4000 666 100 00:30:00 2 UFOP@fpsp.fapesp.br
+ 6-AUG-14 2.8 UBUNTU LTS 14.04 make set-core-pattern ptest11 gjc@alum.mit.edu
 
 Notes: Crashme V1.0 {1000 20 200} used to down the SUN 4/110. V1.2 does *not*
 crash SUNOS 4.1.1 on the same arguments. Although using the extra argument
@@ -411,11 +413,8 @@ my_signal (int sig, void (*func) ())
   signal (sig, func);
 #else
   struct sigaction act;
+  memset (&act, 0, sizeof (act));
   act.sa_handler = func;
-  memset (&act.sa_mask, 0, sizeof (act.sa_mask));
-#ifdef linux
-  act.sa_restorer = 0;
-#endif /* linux */
   act.sa_flags = SA_NOMASK;
 #ifdef SA_RESTART
   act.sa_flags |= SA_RESTART;
