@@ -2,7 +2,7 @@
 # unix makefile for crashme program.
 
 CCFLAGS=-DPRNG_MT $(CFLAGS) $(LDFLAGS) $(CPPFLAGS)
-DIST_VERSION=2.8.3
+DIST_VERSION=2.8.5
 
 all: crashme pddet
 
