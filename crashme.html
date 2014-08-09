@@ -16,12 +16,13 @@
 <p>Copyright 1996-2014 by George J. Carrette. All rights Reserved.
 </p>
 
+<p>To see what version of crashme you have, use
+these arguments: <b>crashme 0 0 0</b></p>
+
 <p>See the source crashme.c for reports of system crashes.
 Software available:
 
 <ul>
- <li>Source tarball <a target="_blank" href="http://crashme.codeplex.com/releases/view/122163">crashme-2.7.tgz download page</a>
-</li>
 <li>Windows installer, source code (ZIP) for download, 
     and subversion checkout,
     <a href="http://crashme.codeplex.com/">crashme.codeplex.com</a>
@@ -44,6 +45,11 @@ newsgroups.  But as the author of this gross hack I take full
 responsibility for any errors in the information presented.
 </p>
 
+<p>
+Special thanks to Dariusz Dwornikowsk the
+maintainer of the 
+<a href="https://tracker.debian.org/pkg/crashme">Debian package for Crashme</a>.
+</p>
 <hr/>
 
 <p>
@@ -152,7 +158,7 @@ exit status ... number of cases
 <p>The status values here could be decoded by reading the
 documentation for the "wait" system procedure, and looking up the
 correct part of the value in the sys_errlist[] array. That is left as
-an exersize for the reader.
+an exercise for the reader.
 </p>
 
 <hr/>
@@ -277,7 +283,7 @@ availability) people into a project in order to get it going again.
 Having a subsystem in a different address space is one way to protect
 complex data manipulated through an API. However, as page 127 of
 "Inside Windows NT" there are some optimizations that make an unspoken
-trade-off between the robustness afforded by a protected seperate
+trade-off between the robustness afforded by a protected separate
 address space and efficiency of implementation on an API.
 </p>
 <p>Robustness and 'scrutability of failure situations' vs efficiency.
@@ -413,6 +419,42 @@ pseudorandom number generator used.
      http://statmath.wu-wien.ac.at/prng/doc/prng.html
      Also of course http://www.stat.fsu.edu/pub/diehard/
 -->
+
+
+
+<p>Notes for release 2.8.5 of Crashme. 6-AUG-2014 GJC.
+</p>
+
+<p>
+The makefile (which is only available in the source code) has
+some useful targets for turning off the automatic bug reporting mechanisms
+for some operating systems. These mechanism tend to use a large amount
+of resources when crashme is running, slowing everything down.
+</p>
+
+<ul>
+<li>Apple Mac: report-crash-stop</li>
+<li>Ubuntu Linux: apport-crash-stop</li>
+</ul>
+
+<p>
+Crashme tends to no longer provide reproducible results when running
+in a mode where it is spawning multiple copies of itself, running
+either simultaneously or sequentially. For example, on a certain Ubuntu
+14.04 LTS one could invoke a command to run crashme has if it were
+the 100'th subprocess running at verbose level 5.
+<blockquote><pre><tt>crashme 1000 101 22 100 5 subprocess</tt></pre></blockquote>
+
+The sequence of signals caught is: 11,4,4,11,...11,11. For 22 of them.
+</p>
+<p>But then back off, and start a sequence of subprocesses using:
+
+<blockquote><pre><tt>crashme 1000 1 22 -100 5</tt></pre></blockquote>
+
+When it gets to subprocess 100 with the same exact arguments
+as in the single-command call the sequence of
+signals caught is: 11,14,4,11,11,11,11,11,4. Only 9 of then,
+and the 10'th try results in a process exit. </p>
 
 </body>
 </html>
