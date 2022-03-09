@@ -2,7 +2,7 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ testme* ]
   pull_request:
     branches: [ master ]
 
@@ -19,4 +19,5 @@ jobs:
       run: make
     - name: make test1
       run: make test1
-      
+    - name: make showcrashlogs
+      run: make showcrashlogs
