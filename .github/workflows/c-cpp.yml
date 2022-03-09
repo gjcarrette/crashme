@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: configure
       run: echo no configure yet
-    - name: make
+    - name: make "CFLAGS=-Wall -DPRNG_MT -g" CC=gcc
       run: make
     - name: make test1
       run: make test1
