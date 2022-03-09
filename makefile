@@ -107,7 +107,7 @@ LOG_DIR=logs
 LOG_DIR2=$$HOME/Library/Logs/DiagnosticReports
 
 showcrashlogs:
-	ls $(LOG_DIR)
+	ls -l $(LOG_DIR)
 	if [ -d $(LOG_DIR2) ]; then ls $(LOG_DIR2); fi
 
 
