@@ -161,6 +161,7 @@ test1a:
 	./pddet -examine 16 > $(LOG_DIR)/pddet.log
 
 test1b:
+	mkdir -p $(LOG_DIR)
 	sh -c "CRASHPRNG=MT;export CRASHPRNG;./crashme -64 666 5 -15 3" > $(LOG_DIR)/crashme-prng_mt.log
 	sh -c "CRASHPRNG=RAND;export CRASHPRNG;./crashme -64 666 5 -15 3" > $(LOG_DIR)/crashme-prng_rand.log
 	sh -c "CRASHPRNG=VNSQ;export CRASHPRNG;./crashme -64 666 5 -15 3" > $(LOG_DIR)/crashme-prng_vnsq.log
@@ -168,13 +169,16 @@ test1b:
 test1c: test1ca test1cb test1cc
 
 test1ca:
+	mkdir -p $(LOG_DIR)
 	sh -c "CRASHPRNG=MT;export CRASHPRNG;CRASHLOG=$(LOG_DIR)/crashme-test1-mt.log;export CRASHLOG;./crashme 8192 666 100 00:00:30 3"
 
 test1cb:
+	mkdir -p $(LOG_DIR)
 	sh -c "CRASHPRNG=RAND;export CRASHPRNG;CRASHLOG=$(LOG_DIR)/crashme-test1-rand.log;export CRASHLOG;./crashme 8192 666 100 00:00:30 3"
 
 
 test1cc:
+	mkdir -p $(LOG_DIR)
 	sh -c "CRASHPRNG=VNSQ;export CRASHPRNG;CRASHLOG=$(LOG_DIR)/crashme-test1-vnsq.log;export CRASHLOG;./crashme 8192 666 100 00:00:30 3"
 
 test-mt19937ar: mt19937ar_main
