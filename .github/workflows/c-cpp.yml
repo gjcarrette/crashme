@@ -12,7 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: checout
+      uses: actions/checkout@v2
     - name: configure
       run: echo no configure yet
     - name: make "CFLAGS=-Wall -DPRNG_MT -g" CC=gcc
@@ -21,3 +22,8 @@ jobs:
       run: make test1
     - name: make showcrashlogs
       run: make showcrashlogs
+    - name: Archive crashlogs
+      uses: actions/upload-artifact@v3
+      with:
+        name: crashlogs
+        path: logs
